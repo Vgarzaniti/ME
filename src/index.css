@@ -1,0 +1,25 @@
+:root {
+  /* 🎨 Colores base */
+  --color-primary: #0a0a0a;       /* Negro profundo: fondo principal */
+  --color-tertiary: #1a1a1a;      /* Negro más claro: tarjetas, navbar */
+  --color-secondary: #00ff88;     /* Verde acento: bordes, botones, íconos */
+
+  /* 🌗 Derivados automáticos */
+  --color-secondary-hover: #00cc6a; /* Verde más oscuro para hover */
+  --color-border: rgba(0, 255, 136, 0.3);
+  --color-shadow: rgba(0, 255, 136, 0.15);
+
+  /* 🧍‍♂️ Texto */
+  --text-main: #f5f5f5;
+  --text-muted: #cccccc;
+
+  /* 🧱 UI y elementos */
+  --radius: 8px;
+  --transition: 0.3s ease;
+
+  /* ✍️ Tipografía */
+  --font-family: "Poppins", sans-serif;
+  --font-size-base: 16px;
+  --font-size-heading: 2rem;
+  --font-size-subheading: 1.25rem;
+}

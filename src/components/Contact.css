@@ -1,0 +1,38 @@
+.contact {
+  text-align: center;
+  padding: 4rem 1rem;
+  margin-top: 4rem;
+  background-color: var(--color-tertiary);
+  border-top: 1px solid var(--color-border);
+}
+
+.contact h2 {
+  color: var(--color-secondary);
+  margin-bottom: 1rem;
+}
+
+.contact p {
+  color: var(--text-muted);
+}
+
+.contact-links {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.contact-links a {
+  border: 1px solid var(--color-secondary);
+  color: var(--color-secondary);
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  transition: all var(--transition);
+}
+
+.contact-links a:hover {
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+}

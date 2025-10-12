@@ -1,0 +1,21 @@
+.about {
+  background-color: var(--color-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  text-align: center;
+  padding: 4rem 1rem;
+  margin-top: 3rem;
+  box-shadow: 0 4px 12px var(--color-shadow);
+}
+
+.about h2 {
+  color: var(--color-secondary);
+  margin-bottom: 1rem;
+}
+
+.about p {
+  color: var(--text-main);
+  line-height: 1.7;
+  max-width: 700px;
+  margin: 0.5rem auto;
+}
