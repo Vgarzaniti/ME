@@ -1,34 +1,29 @@
-import React from "react";
-import "./App.css";
+import React, { Suspense, lazy } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import About from "./components/About";
-import Projects from "./components/Projects";
-import Contact from "./components/Contact";
+import Layout from "./components/Layout";
+
+const Home = lazy(() => import("./pages/home"));
+const AboutPage = lazy(() => import("./pages/about"));
+const ProjectsPage = lazy(() => import("./pages/projects"));
+const ContactPage = lazy(() => import("./pages/contact"));
+const NotFound = lazy(() => import("./pages/notfound"));
 
 function App() {
   return (
-    <>
-      {/* 🔝 Barra de navegación */}
-      <Navbar />
-
-      {/* 🏠 Sección principal */}
-      <main>
-        <Hero />
-        <About />
-        <Projects />
-        <Contact />
-      </main>
-
-      {/* 🧾 Footer simple */}
-      <footer className="footer">
-        <p>
-          © {new Date().getFullYear()} Valentín Garzaniti — Built with{" "}
-          <span className="accent">React</span> & ❤️
-        </p>
-      </footer>
-    </>
+    <BrowserRouter>
+      <Suspense fallback={<div className="loader">Loading...</div>}>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="projects" element={<ProjectsPage />} />
+            <Route path="contact" element={<ContactPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
   );
 }
 

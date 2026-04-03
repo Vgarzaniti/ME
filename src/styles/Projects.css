@@ -1,0 +1,193 @@
+.projects {
+  text-align: center;
+  margin-top: 4rem;
+}
+
+.projects h2 {
+  color: var(--color-secondary);
+  margin-bottom: 2rem;
+}
+
+.carousel-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.carousel-btn {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--text-main);
+  padding: 0.5rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.carousel-btn:hover {
+  background: rgba(0, 255, 136, 0.12);
+}
+
+.carousel-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.projects-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+}
+
+@media (max-width: 1100px) {
+  .projects-grid {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.project-card {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 0.75rem;
+  background-color: var(--color-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  transition: transform var(--transition), box-shadow var(--transition);
+  box-shadow: 0 4px 12px var(--color-shadow);
+  height: 430px;
+  overflow: hidden;
+}
+
+.project-card .project-content {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.project-card h3,
+.project-card p,
+.project-extra {
+  max-height: 5.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.project-card .project-footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.project-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px var(--color-shadow);
+}
+
+.project-card h3 {
+  color: var(--text-main);
+}
+
+.project-card p {
+  color: var(--text-muted);
+  margin: 0.5rem 0 1rem;
+}
+
+.project-card a,
+.project-card .project-toggle,
+.project-card .project-github {
+  color: var(--color-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition), transform var(--transition);
+}
+
+.project-card a:hover,
+.project-card .project-toggle:hover,
+.project-card .project-github:hover {
+  color: var(--color-secondary-hover);
+  transform: translateY(-1px);
+}
+
+.project-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.project-link,
+.project-github {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-secondary);
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.project-link:hover,
+.project-github:hover {
+  color: var(--color-secondary-hover);
+  transform: translateY(-1px);
+}
+
+.project-extra {
+  margin-top: 0.8rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.2);
+  padding-top: 0.8rem;
+  color: var(--text-main);
+  text-align: left;
+}
+
+.project-status {
+  margin-top: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  align-self: flex-start;
+}
+
+.project-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.project-actions .project-link,
+.project-actions .project-github {
+  margin-bottom: 0;
+}
+
+.status-deployed {
+  color: #00ff86;
+}
+
+.status-repo {
+  color: #ffb300;
+}
+
+.tag {
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-left: 8px;
+  text-transform: uppercase;
+}

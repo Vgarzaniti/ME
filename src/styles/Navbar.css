@@ -31,3 +31,23 @@
 .nav-links a:hover {
   color: var(--color-secondary);
 }
+
+.nav-links .active {
+  color: var(--color-secondary);
+  border-bottom: 2px solid var(--color-secondary);
+  padding-bottom: 0.2rem;
+}
+
+.nav-links a {
+  transition: color var(--transition), transform var(--transition);
+}
+
+.nav-links a:hover {
+  color: #8bffb9;
+  transform: translateY(-1px);
+}
+
+.navbar {
+  background-color: rgba(26, 26, 26, 0.92);
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.4);
+}

@@ -1,16 +1,54 @@
-# React + Vite
+﻿# Portfolio React con Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Esta aplicación es un portfolio personal de Valentín Garzaniti construido con React + Vite.
 
-Currently, two official plugins are available:
+## Estructura actual
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- `src/components` - componentes UI: `Navbar`, `Hero`, `About`, `Projects`, `Contact`, `Layout`
+- `src/pages` - rutas: `home`, `about`, `projects`, `contact`, `notfound`
+- `src/styles` - CSS compartido/componentes
+- `src/data/projects.js` - datos de proyectos usados en `Projects` (actualmente CLUD2025)
 
-## React Compiler
+## Proyecto principal
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- CLUD2025 (React + Django + PostgreSQL)
+- Frontend: https://clud2025.vercel.app/
+- Backend: Render + neon.tech
+- Credenciales de administrador (para demo local/privado): admin@gmail.com / admin123
 
-## Expanding the ESLint configuration
+## Routing
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Se usa `react-router-dom` con:
+
+- `/` → `Home` (Hero + About + Projects + Contact)
+- `/about` → sección About
+- `/projects` → sección Projects
+- `/contact` → sección Contact
+- `*` → página 404
+
+## Script importantes
+
+- `npm install`
+- `npm run dev`
+- `npm run build`
+
+## Mejora de la experiencia de reclutador
+
+- Lazy loading (React.lazy + Suspense)
+- Layout con navbar/footer consistente
+- Datos de proyectos separados en `src/data`
+- `README` actualizado
+
+## Dependencias
+
+- `react` ^19
+- `react-dom` ^19
+- `react-router-dom` (ruteo)
+
+---
+
+**Siguientes pasos propuestos**
+
+- agregar tests de componentes (Vitest + @testing-library/react)
+- desplegar en Vercel/Railway
+- incluir badge de cobertura en el README
