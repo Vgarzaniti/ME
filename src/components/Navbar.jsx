@@ -27,7 +27,7 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-      <h2 className="logo">Valentín Garzaniti</h2>
+      <h2 className="logo">Garzaniti IT</h2>
       <ul className="nav-links">
         <li>
           <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : "")}>Home</NavLink>

@@ -6,11 +6,12 @@ function About() {
     <section id="about" className="about">
       <h2>About Me</h2>
       <p>
-            I'm a Full-Stack Developer and Information Systems Engineering student from Argentina, 
-            passionate about building efficient and scalable web applications. 
-            I specialize in both frontend and backend development, using modern tools and frameworks 
-            to deliver clean, maintainable code.
-            </p>
+        I'm <span className="highlight">Valentín Augusto Garzaniti</span>, the developer behind <strong>Garzaniti IT</strong>. 
+        I'm an Information Systems Engineering student from Argentina, 
+        passionate about building efficient and scalable web applications. 
+        I specialize in both frontend and backend development, using modern tools and frameworks 
+        to deliver clean, maintainable code.
+      </p>
             <p>
             <strong>Stack:</strong> JavaScript • React • Python • Django • MySQL • PostgreSQL • GitHub • 
             Agile Methodologies • Railway • Vercel

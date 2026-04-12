@@ -5,9 +5,9 @@ function Hero() {
   return (
     <section className="hero" id="hero">
       <h1>
-        Hi, I'm <span className="highlight">Valentín</span> 👋
+        Hi, I'm <span className="highlight">Valentín Augusto Garzaniti</span> 👋
       </h1>
-      <h2>Full-Stack Developer </h2>
+      <h2>Garzaniti IT | Full-Stack Developer</h2>
       <p>
         I build scalable web applications and APIs, and deploy them to cloud
         platforms like <strong>Railway</strong> , <strong>Vercel</strong> and <strong>AWS</strong>.
