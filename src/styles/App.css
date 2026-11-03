@@ -1,74 +1,83 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-/* 🧠 Variables globales */
+/* 🧠 Global Design Tokens */
 :root {
-  --color-primary: #0a0a0a;       /* Fondo principal */
-  --color-tertiary: #1a1a1a;      /* Negro más claro */
-  --color-secondary: #00ff88;     /* Verde acento */
-  --color-secondary-hover: #00cc6a;
-  --color-border: rgba(0, 255, 136, 0.3);
-  --color-shadow: rgba(0, 255, 136, 0.15);
+  --color-primary: #080b10;       /* Rich dark obsidian */
+  --color-surface: #0e131b;       /* Card surface */
+  --color-tertiary: #141b24;      /* Elevated surface */
+  --color-secondary: #00ff88;     /* Neon mint accent */
+  --color-secondary-hover: #33ff9f;
+  --color-accent-blue: #38bdf8;   /* Cyan secondary accent */
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-glow: rgba(0, 255, 136, 0.3);
+  --color-shadow: rgba(0, 255, 136, 0.12);
 
-  --text-main: #f5f5f5;
-  --text-muted: #cccccc;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-subtle: #64748b;
 
-  --radius: 8px;
-  --transition: 0.3s ease;
-  --font-family: "Poppins", sans-serif;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 }
 
-/* 🎨 Estilos globales */
-body {
-  background-color: var(--color-primary);
-  color: var(--text-main);
-  font-family: var(--font-family);
-  margin: 0;
+/* 🎨 Global Layout */
+* {
+  box-sizing: border-box;
+}
+
+html {
   scroll-behavior: smooth;
 }
 
-main {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
+body {
+  background-color: var(--color-primary);
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 255, 136, 0.12), transparent 70%),
+    radial-gradient(circle at 100% 60%, rgba(56, 189, 248, 0.05), transparent 50%);
+  background-attachment: fixed;
+  color: var(--text-main);
+  font-family: var(--font-family);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 🧾 Footer */
+main {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+/* 🧾 Modern Footer */
 .footer {
   text-align: center;
-  padding: 2rem 0;
+  padding: 3rem 1rem;
   border-top: 1px solid var(--color-border);
   color: var(--text-muted);
-  background-color: var(--color-tertiary);
+  background-color: rgba(14, 19, 27, 0.7);
+  backdrop-filter: blur(12px);
+}
+
+.footer p {
+  margin: 0;
+  font-size: 0.92rem;
 }
 
 .accent {
   color: var(--color-secondary);
+  font-weight: 600;
 }
+
 @media (max-width: 768px) {
   main {
-    padding: 1.5rem 1rem;
+    padding: 1rem 1rem 3rem;
   }
 
   .footer {
-    padding: 1.5rem 0;
-    font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 480px) {
-  main {
-    padding: 1rem;
-  }qu
-
-  h1, h2, h3 {
-    font-size: 1.2rem;
-  }
-
-  body {
-    font-size: 0.9rem;
-  }
-
-  .footer {
-    font-size: 0.8rem;
+    padding: 2rem 1rem;
+    font-size: 0.85rem;
   }
 }

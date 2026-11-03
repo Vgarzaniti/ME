@@ -1,52 +1,53 @@
-.projects {
+.projects-section {
+  margin-top: 5rem;
   text-align: center;
-  margin-top: 4rem;
-}
-
-.projects h2 {
-  color: var(--color-secondary);
-  margin-bottom: 2rem;
 }
 
 .carousel-controls {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.carousel-page-indicator {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
 .carousel-btn {
   border: 1px solid var(--color-border);
-  background: transparent;
+  background: rgba(255, 255, 255, 0.04);
   color: var(--text-main);
-  padding: 0.5rem 0.9rem;
-  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
   transition: all var(--transition);
 }
 
-.carousel-btn:hover {
+.carousel-btn:hover:not(:disabled) {
   background: rgba(0, 255, 136, 0.12);
+  border-color: rgba(0, 255, 136, 0.3);
+  color: var(--color-secondary);
+  transform: translateY(-1px);
 }
 
 .carousel-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
 .projects-grid {
   display: grid;
-  gap: 2rem;
-  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 1.5rem;
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
 }
 
-@media (max-width: 1100px) {
-  .projects-grid {
-    grid-template-columns: repeat(2, minmax(220px, 1fr));
-  }
-}
-
-@media (max-width: 680px) {
+@media (max-width: 768px) {
   .projects-grid {
     grid-template-columns: 1fr;
   }
@@ -55,135 +56,140 @@
 .project-card {
   display: flex;
   flex-direction: column;
-  background-color: var(--color-tertiary);
+  background: rgba(14, 19, 27, 0.7);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  padding: 1.5rem;
-  transition: transform var(--transition), box-shadow var(--transition);
-  box-shadow: 0 4px 12px var(--color-shadow);
-  height: 100%; /* Ensure they fill the grid row height */
-  min-height: 380px; /* Consistent minimum height */
-}
-
-.project-card .project-content {
-  flex-grow: 1; /* This pushes the footer down */
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  margin-bottom: 1.5rem;
+  padding: 1.75rem;
   text-align: left;
-}
-
-.project-card h3 {
-  color: var(--text-main);
-  font-size: 1.25rem;
-  margin-bottom: 0.5rem;
-  line-height: 1.3;
-}
-
-.project-card p {
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 4; /* Limit to 4 lines for aesthetic consistency */
-  line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.project-extra {
-  margin-top: auto; /* Push extra to bottom of content area */
-  padding-top: 0.8rem;
-  border-top: 1px dashed rgba(255, 255, 255, 0.1);
-  color: var(--color-secondary);
-  font-size: 0.85rem;
-  font-style: italic;
-}
-
-.project-card .project-footer {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: auto; /* Ensure footer stays at the bottom */
+  position: relative;
+  transition: all var(--transition);
+  backdrop-filter: blur(10px);
 }
 
 .project-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 18px var(--color-shadow);
+  border-color: var(--color-border-glow);
+  transform: translateY(-4px);
+  box-shadow: 
+    0 12px 30px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(0, 255, 136, 0.1);
 }
 
-.project-card a,
-.project-card .project-toggle,
-.project-card .project-github {
-  color: var(--color-secondary);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color var(--transition), transform var(--transition);
-}
-
-.project-card a:hover,
-.project-card .project-toggle:hover,
-.project-card .project-github:hover {
-  color: var(--color-secondary-hover);
-  transform: translateY(-1px);
-}
-
-.project-actions {
+.card-top-row {
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.25rem;
-}
-
-.project-link,
-.project-github {
-  border: 1px solid var(--color-border);
-  background: transparent;
-  color: var(--color-secondary);
-  padding: 0.45rem 0.9rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  text-decoration: none;
-  transition: all var(--transition);
-}
-
-.project-link:hover,
-.project-github:hover {
-  background: rgba(0, 255, 136, 0.05);
-  color: var(--color-secondary-hover);
-  border-color: var(--color-secondary-hover);
-  transform: translateY(-1px);
+  margin-bottom: 1rem;
 }
 
 .project-status {
-  margin-top: 0.5rem;
-  font-weight: 700;
-  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  align-self: flex-start;
+  letter-spacing: 0.05em;
 }
 
 .status-deployed {
-  color: #00ff86;
+  background: rgba(0, 255, 136, 0.12);
+  color: var(--color-secondary);
+  border: 1px solid rgba(0, 255, 136, 0.3);
 }
 
 .status-repo {
-  color: #ffb300;
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
 }
 
-.tag {
-  background-color: var(--color-secondary);
-  color: var(--color-primary);
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 2px 8px;
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.project-content {
+  flex: 1;
+}
+
+.project-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  color: var(--text-main);
+}
+
+.project-desc {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #cbd5e1;
+  margin: 0 0 1.25rem;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 1.25rem;
+}
+
+.project-tag {
+  font-size: 0.74rem;
+  padding: 0.2rem 0.55rem;
   border-radius: 6px;
-  margin-left: 8px;
-  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.project-extra {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
+.project-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--color-border);
+  padding-top: 1.25rem;
+}
+
+.project-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  transition: all var(--transition);
+}
+
+.btn-view {
+  background: rgba(0, 255, 136, 0.12);
+  color: var(--color-secondary);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+.btn-view:hover {
+  background: var(--color-secondary);
+  color: #0a0a0a;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+}
+
+.btn-repo {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  border: 1px solid var(--color-border);
+}
+
+.btn-repo:hover {
+  border-color: rgba(0, 255, 136, 0.4);
+  color: var(--color-secondary);
 }

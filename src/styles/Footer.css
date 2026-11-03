@@ -1,0 +1,344 @@
+/* 🧾 Enhanced Modern Footer Styles with Rich Profile Cards */
+.footer-site {
+  background-color: rgba(8, 11, 16, 0.96);
+  border-top: 1px solid var(--color-border);
+  padding: 4.5rem 1.5rem 2rem;
+  margin-top: 6rem;
+  color: var(--text-muted);
+  backdrop-filter: blur(16px);
+  position: relative;
+}
+
+.footer-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 3.5rem;
+  padding-bottom: 3rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 900px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.footer-logo .logo-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-secondary);
+  box-shadow: 0 0 10px var(--color-secondary);
+}
+
+.footer-logo .logo-text {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.footer-tagline {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  margin: 0 0 1.25rem;
+}
+
+.footer-badge-available {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--color-secondary);
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.25);
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  margin-bottom: 2rem;
+}
+
+.badge-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-secondary);
+  box-shadow: 0 0 8px var(--color-secondary);
+  animation: pulseDot 2s infinite;
+}
+
+.footer-mini-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: #64748b;
+  margin: 0 0 0.8rem;
+}
+
+.footer-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.footer-pill {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  text-decoration: none;
+  transition: all var(--transition);
+}
+
+.footer-pill:hover {
+  background: rgba(0, 255, 136, 0.12);
+  border-color: rgba(0, 255, 136, 0.3);
+  color: var(--color-secondary);
+}
+
+/* Rich Profiles Column */
+.footer-col-title {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 1.25rem;
+}
+
+.footer-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.footer-profile-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: rgba(14, 19, 27, 0.85);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.2rem 1.4rem;
+  text-decoration: none;
+  color: var(--text-main);
+  transition: all var(--transition);
+}
+
+.footer-profile-card:hover {
+  border-color: var(--color-border-glow);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  background: rgba(20, 27, 36, 0.9);
+}
+
+.card-avatar-box {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-photo {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-secondary);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.25);
+  display: block;
+}
+
+.platform-avatar-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.wa-circle {
+  background: rgba(37, 211, 102, 0.15);
+  border: 1px solid rgba(37, 211, 102, 0.35);
+  color: #25d366;
+}
+
+.gh-circle {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.mail-circle {
+  background: rgba(234, 67, 53, 0.15);
+  border: 1px solid rgba(234, 67, 53, 0.35);
+  color: #ea4335;
+}
+
+.status-online-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #25d366;
+  border: 2px solid #080b10;
+  box-shadow: 0 0 6px #25d366;
+}
+
+.platform-icon-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border: 1.5px solid #080b10;
+}
+
+.in-badge {
+  background: #0a66c2;
+  color: #fff;
+}
+
+.gh-badge {
+  background: #24292e;
+  color: #fff;
+}
+
+.card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  gap: 8px;
+}
+
+.profile-name {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.connect-tag {
+  font-size: 0.75rem;
+  color: #0a66c2;
+  background: rgba(10, 102, 194, 0.12);
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.repo-count-pill {
+  font-size: 0.72rem;
+  color: var(--color-secondary);
+  background: rgba(0, 255, 136, 0.1);
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.online-pill {
+  font-size: 0.72rem;
+  color: #25d366;
+  background: rgba(37, 211, 102, 0.12);
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.inbox-tag {
+  font-size: 0.72rem;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.profile-role {
+  font-size: 0.82rem;
+  color: var(--color-secondary);
+  font-weight: 500;
+  margin: 0 0 0.25rem;
+}
+
+.profile-desc {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.email-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 0.6rem;
+}
+
+.email-action-btn {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.email-action-btn.copy {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--color-border);
+  color: var(--text-main);
+}
+
+.email-action-btn.copy:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.email-action-btn.send {
+  background: var(--color-secondary);
+  border: 1px solid var(--color-secondary);
+  color: #0a0a0a;
+}
+
+.email-action-btn.send:hover {
+  background: #39ff9e;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: 2rem;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.footer-bottom p {
+  margin: 0;
+}

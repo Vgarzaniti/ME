@@ -3,8 +3,10 @@ import { useLocation } from "react-router-dom";
 import "../styles/App.css";
 
 import Hero from "../components/Hero";
-import About from "../components/About";
+import ScrollShowcase from "../components/ScrollShowcase";
+import Services from "../components/Services";
 import Projects from "../components/Projects";
+import About from "../components/About";
 import Contact from "../components/Contact";
 
 function Home() {
@@ -25,8 +27,10 @@ function Home() {
   return (
     <>
       <Hero />
-      <About />
+      <ScrollShowcase />
+      <Services />
       <Projects />
+      <About />
       <Contact />
     </>
   );

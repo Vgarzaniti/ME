@@ -1,53 +1,94 @@
+.navbar-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: center;
+}
+
 .navbar {
+  width: 100%;
+  max-width: 1100px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background-color: var(--color-tertiary);
-  border-bottom: 1px solid var(--color-border);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  padding: 0.75rem 1.75rem;
+  background: rgba(14, 19, 27, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
-.logo {
-  color: var(--color-secondary);
-  font-weight: 600;
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.logo-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-secondary);
+  box-shadow: 0 0 12px var(--color-secondary);
+}
+
+.logo-text {
+  color: var(--text-main);
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
 }
 
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
   margin: 0;
+  padding: 0;
+  align-items: center;
 }
 
 .nav-links a {
-  color: var(--text-main);
+  color: var(--text-muted);
   text-decoration: none;
-  transition: color var(--transition);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.4rem 0.8rem;
+  border-radius: 9999px;
+  transition: all var(--transition);
 }
 
 .nav-links a:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.nav-links a.active {
   color: var(--color-secondary);
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.25);
 }
 
-.nav-links .active {
-  color: var(--color-secondary);
-  border-bottom: 2px solid var(--color-secondary);
-  padding-bottom: 0.2rem;
-}
+@media (max-width: 600px) {
+  .navbar-wrapper {
+    padding: 0.5rem;
+  }
 
-.nav-links a {
-  transition: color var(--transition), transform var(--transition);
-}
+  .navbar {
+    padding: 0.6rem 1rem;
+  }
 
-.nav-links a:hover {
-  color: #8bffb9;
-  transform: translateY(-1px);
-}
+  .nav-links {
+    gap: 0.5rem;
+  }
 
-.navbar {
-  background-color: rgba(26, 26, 26, 0.92);
-  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.4);
+  .nav-links a {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
 }

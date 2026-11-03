@@ -1,6 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
+import Footer from "./Footer";
 
 function Layout() {
   return (
@@ -9,11 +10,7 @@ function Layout() {
       <main>
         <Outlet />
       </main>
-      <footer className="footer">
-        <p>
-          © {new Date().getFullYear()} Valentín Garzaniti — Built with <span className="accent">React</span> & ❤️
-        </p>
-      </footer>
+      <Footer />
     </>
   );
 }

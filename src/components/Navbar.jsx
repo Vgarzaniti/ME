@@ -26,29 +26,58 @@ function Navbar() {
   };
 
   return (
-    <nav className="navbar">
-      <h2 className="logo">Garzaniti IT</h2>
-      <ul className="nav-links">
-        <li>
-          <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : "")}>Home</NavLink>
-        </li>
-        <li>
-          <a href="#about" onClick={handleScroll("about")} className={location.hash === "#about" ? "active" : ""}>
-            About
-          </a>
-        </li>
-        <li>
-          <a href="#projects" onClick={handleScroll("projects")} className={location.hash === "#projects" ? "active" : ""}>
-            Projects
-          </a>
-        </li>
-        <li>
-          <a href="#contact" onClick={handleScroll("contact")} className={location.hash === "#contact" ? "active" : ""}>
-            Contact
-          </a>
-        </li>
-      </ul>
-    </nav>
+    <header className="navbar-wrapper">
+      <nav className="navbar">
+        <a href="/" className="logo-link">
+          <span className="logo-dot" />
+          <span className="logo-text">Garzaniti IT</span>
+        </a>
+
+        <ul className="nav-links">
+          <li>
+            <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : "")}>
+              Home
+            </NavLink>
+          </li>
+          <li>
+            <a
+              href="#services"
+              onClick={handleScroll("services")}
+              className={location.hash === "#services" ? "active" : ""}
+            >
+              Services
+            </a>
+          </li>
+          <li>
+            <a
+              href="#projects"
+              onClick={handleScroll("projects")}
+              className={location.hash === "#projects" ? "active" : ""}
+            >
+              Projects
+            </a>
+          </li>
+          <li>
+            <a
+              href="#about"
+              onClick={handleScroll("about")}
+              className={location.hash === "#about" ? "active" : ""}
+            >
+              About
+            </a>
+          </li>
+          <li>
+            <a
+              href="#contact"
+              onClick={handleScroll("contact")}
+              className={location.hash === "#contact" ? "active" : ""}
+            >
+              Contact
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </header>
   );
 }
 
