@@ -3,30 +3,34 @@ import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import About from "./About";
 
-describe("About component with Bento Grid", () => {
-  it("renders about heading and credentials", () => {
+describe("About component with Unified 3D Architecture Rig", () => {
+  it("renders about credentials and the unified architecture stage", () => {
     render(<About />);
 
-    expect(screen.getByText(/About Me & Skills Lab/i)).toBeInTheDocument();
-    expect(screen.getByText(/Core Technical Pillars/i)).toBeInTheDocument();
+    expect(screen.getByText(/About Me & Skills Architecture/i)).toBeInTheDocument();
+    expect(screen.getByText(/The Full-Stack Architecture Rig/i)).toBeInTheDocument();
+    expect(screen.getByText(/Unified System Canvas • Zero Cards/i)).toBeInTheDocument();
+    expect(screen.getByText("SERVER RACK")).toBeInTheDocument();
+    expect(screen.getByText("CLOUD TOWER")).toBeInTheDocument();
   });
 
-  it("interacts with the live React state tester in Bento 2", () => {
+  it("interacts with the database blade query button", () => {
     render(<About />);
 
-    const stateBtn = screen.getByText(/State:/i);
-    expect(screen.getByText(/42/i)).toBeInTheDocument();
+    const dbQueryBtn = screen.getByRole("button", { name: /Query Database Blade/i });
+    expect(dbQueryBtn).toBeInTheDocument();
 
-    fireEvent.click(stateBtn);
-    expect(screen.getByText(/43/i)).toBeInTheDocument();
+    fireEvent.click(dbQueryBtn);
+    expect(screen.getByText(/Q#2 • 18ms latency/i)).toBeInTheDocument();
   });
 
-  it("executes the SQL query benchmark in Bento 1", () => {
+  it("triggers the n8n data pulse in the conduit system", () => {
     render(<About />);
 
-    const runBtn = screen.getByText(/Execute Query/i);
-    fireEvent.click(runBtn);
+    const n8nPulseBtn = screen.getByRole("button", { name: /Fire n8n Data Pulse/i });
+    expect(n8nPulseBtn).toBeInTheDocument();
 
-    expect(screen.getByText(/4 rows returned/i)).toBeInTheDocument();
+    fireEvent.click(n8nPulseBtn);
+    expect(n8nPulseBtn).toHaveClass("active");
   });
 });
