@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLanguage } from "../context/LanguageContext";
 import "../styles/Footer.css";
 
 // Official brand SVG icons
@@ -25,11 +26,12 @@ const GmailIcon = () => (
 );
 
 function Footer() {
+  const { t, language } = useLanguage();
   const [copied, setCopied] = useState(false);
   const email = "valenxity@gmail.com";
   const whatsappNumber = "5492213542002";
   const whatsappDisplay = "+54 221 354 2002";
-  const whatsappLink = `https://wa.me/${whatsappNumber}?text=Hi%20Valent%C3%ADn,%20I'm%20contacting%20you%20from%20your%20portfolio.`;
+  const whatsappLink = `https://wa.me/${whatsappNumber}?text=Hola%20Valent%C3%ADn,%20te%20contacto%20desde%20tu%20portfolio.`;
 
   const handleCopyEmail = (e) => {
     e.preventDefault();
@@ -50,149 +52,115 @@ function Footer() {
             <span className="logo-dot" />
             <span className="logo-text">Garzaniti IT</span>
           </div>
-          <p className="footer-tagline">
-            Full-Stack Software Engineer & Workflow Automation Specialist.
-            Building resilient digital products from database to cloud deployment.
-          </p>
+          <p className="footer-tagline">{t.footer.tagline}</p>
           <div className="footer-badge-available">
             <span className="badge-pulse-dot" />
-            <span>Open for freelance contracts & technical roles</span>
-          </div>
-
-          <div className="footer-nav-links-block">
-            <h4 className="footer-mini-title">Navigation</h4>
-            <div className="footer-pills-row">
-              <a href="/#hero" className="footer-pill">Home</a>
-              <a href="/#services" className="footer-pill">Services</a>
-              <a href="/#projects" className="footer-pill">Projects</a>
-              <a href="/#about" className="footer-pill">About</a>
-              <a href="/#contact" className="footer-pill">Contact</a>
-            </div>
+            <span>{t.footer.availableBadge}</span>
           </div>
         </div>
 
-        {/* Rich Interactive Profiles & Contact Column */}
-        <div className="footer-col footer-profiles-col">
-          <h4 className="footer-col-title">Connect & Direct Contact</h4>
+        {/* Quick Links Column */}
+        <div className="footer-col">
+          <h4 className="footer-heading">{t.footer.quickNav}</h4>
+          <ul className="footer-nav-list">
+            <li><a href="#hero">{t.nav.home}</a></li>
+            <li><a href="#services">{t.nav.services}</a></li>
+            <li><a href="#projects">{t.nav.projects}</a></li>
+            <li><a href="#about">{t.nav.about}</a></li>
+            <li><a href="#contact">{t.nav.contact}</a></li>
+          </ul>
+        </div>
 
+        {/* Direct Contact & Social Cards */}
+        <div className="footer-col footer-social-col">
+          <h4 className="footer-heading">{t.footer.directContact}</h4>
           <div className="footer-cards-grid">
-            {/* LinkedIn Rich Card with Photo & Summary */}
+            {/* LinkedIn Card */}
             <a
               href="https://www.linkedin.com/in/valent%C3%ADn-garzaniti-216946238/"
               target="_blank"
               rel="noreferrer"
-              className="footer-profile-card linkedin-card"
+              className="footer-card footer-in"
             >
-              <div className="card-avatar-box">
+              <div className="card-media">
                 <img
                   src="/profile.png"
-                  alt="Valentín Garzaniti"
-                  className="profile-photo"
+                  alt="Valentín Augusto Garzaniti"
+                  className="footer-profile-pic"
                 />
-                <span className="platform-icon-badge in-badge">in</span>
+                <span className="mini-badge-in">in</span>
               </div>
               <div className="card-info">
-                <div className="card-title-row">
-                  <span className="profile-name">Valentín Augusto Garzaniti</span>
-                  <span className="connect-tag">Connect ↗</span>
-                </div>
-                <p className="profile-role">
-                  Information Systems Engineering @ UTN FRLP
-                </p>
-                <p className="profile-desc">
-                  Full-Stack Developer • Python, React & n8n Workflow Automation
-                </p>
+                <span className="card-title">Valentín Garzaniti</span>
+                <span className="card-sub">
+                  {language === "es" ? "Ingeniería en Sistemas • UTN" : "Systems Engineering • UTN"}
+                </span>
               </div>
+              <span className="arrow-chip">↗</span>
             </a>
 
-            {/* GitHub Official Logo Card */}
-            <a
-              href="https://github.com/Vgarzaniti/"
-              target="_blank"
-              rel="noreferrer"
-              className="footer-profile-card github-card"
-            >
-              <div className="card-avatar-box">
-                <div className="platform-avatar-circle gh-circle">
-                  <GitHubIcon />
-                </div>
-              </div>
-              <div className="card-info">
-                <div className="card-title-row">
-                  <span className="profile-name">GitHub</span>
-                  <span className="repo-count-pill">15 Repos ↗</span>
-                </div>
-                <p className="profile-role">@Vgarzaniti • Full-Stack Engineer</p>
-                <p className="profile-desc">
-                  Open source contributions, CLUD2025, Suchus-Design & DocTor-History
-                </p>
-              </div>
-            </a>
-
-            {/* WhatsApp Official Logo Card */}
+            {/* WhatsApp Card */}
             <a
               href={whatsappLink}
               target="_blank"
               rel="noreferrer"
-              className="footer-profile-card whatsapp-card"
+              className="footer-card footer-wa"
             >
-              <div className="card-avatar-box">
-                <div className="platform-avatar-circle wa-circle">
-                  <WhatsAppIcon />
-                </div>
-                <span className="status-online-dot" />
+              <div className="footer-svg-box wa-box">
+                <WhatsAppIcon />
               </div>
               <div className="card-info">
-                <div className="card-title-row">
-                  <span className="profile-name">WhatsApp Direct</span>
-                  <span className="online-pill">● Online</span>
-                </div>
-                <p className="profile-role">{whatsappDisplay}</p>
-                <p className="profile-desc">
-                  Instant messaging for client questions, proposals & project scope ↗
-                </p>
+                <span className="card-title">WhatsApp Direct</span>
+                <span className="card-sub">{whatsappDisplay}</span>
               </div>
+              <span className="live-dot-chip">●</span>
             </a>
 
-            {/* Gmail Official Logo Card */}
-            <div className="footer-profile-card email-card">
-              <div className="card-avatar-box">
-                <div className="platform-avatar-circle mail-circle">
-                  <GmailIcon />
-                </div>
+            {/* GitHub Card */}
+            <a
+              href="https://github.com/Vgarzaniti/"
+              target="_blank"
+              rel="noreferrer"
+              className="footer-card footer-gh"
+            >
+              <div className="footer-svg-box gh-box">
+                <GitHubIcon />
               </div>
               <div className="card-info">
-                <div className="card-title-row">
-                  <span className="profile-name">Gmail</span>
-                  <span className="inbox-tag">Direct Inbox</span>
-                </div>
-                <p className="profile-role">{email}</p>
-                <div className="email-card-actions">
-                  <button
-                    onClick={handleCopyEmail}
-                    className="email-action-btn copy"
-                  >
-                    {copied ? "✔ Copied to clipboard!" : "📋 Copy Email"}
-                  </button>
-                  <a
-                    href={`mailto:${email}`}
-                    className="email-action-btn send"
-                  >
-                    Open Mail App ↗
-                  </a>
-                </div>
+                <span className="card-title">GitHub @Vgarzaniti</span>
+                <span className="card-sub">15 Public Repos</span>
+              </div>
+              <span className="arrow-chip">↗</span>
+            </a>
+
+            {/* Email Card */}
+            <div className="footer-card footer-mail">
+              <div className="footer-svg-box mail-box">
+                <GmailIcon />
+              </div>
+              <div className="card-info">
+                <span className="card-title">{email}</span>
+                <button
+                  type="button"
+                  onClick={handleCopyEmail}
+                  className="footer-copy-btn"
+                >
+                  {copied ? `✔ ${t.footer.copiedBtn}` : `📋 ${t.footer.copyBtn}`}
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Copyright & Tech Stack */}
+      {/* Bottom Bar */}
       <div className="footer-bottom">
-        <p>
-          © {new Date().getFullYear()} Valentín Augusto Garzaniti — Built with{" "}
-          <span className="accent">React 19</span>, <span className="accent">Vite</span> & Systems Engineering @ UTN.
-        </p>
+        <div className="footer-bottom-inner">
+          <p>© {new Date().getFullYear()} Garzaniti IT • Valentín Augusto Garzaniti. {t.footer.allRights}</p>
+          <div className="footer-stack-hint">
+            <span>React 19</span> • <span>Python / Django</span> • <span>n8n</span> • <span>PostgreSQL</span>
+          </div>
+        </div>
       </div>
     </footer>
   );

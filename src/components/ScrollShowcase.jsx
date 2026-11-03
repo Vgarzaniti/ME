@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLanguage } from "../context/LanguageContext";
 import "../styles/ScrollShowcase.css";
 
 const CODE_SNIPPETS = {
@@ -78,33 +79,24 @@ export default function InteractiveApp() {
 }`,
   },
   devops: {
-    filename: ".github/workflows/deploy.yml",
-    language: "yaml",
-    badge: "CI/CD & Cloud",
-    code: `name: Production Deployment Pipeline
-on:
-  push:
-    branches: [main]
+    filename: "deploy/railway.toml",
+    language: "toml",
+    badge: "Railway & Vercel",
+    code: `[build]
+builder = "NIXPACKS"
+buildCommand = "npm run build && python manage.py collectstatic --noinput"
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy Frontend to Vercel Edge
-        run: vercel --prod --token=\${{ secrets.VERCEL_TOKEN }}
-      - name: Deploy API to Railway
-        run: railway up --service api --detach`,
+[deploy]
+startCommand = "gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 4"
+healthcheckPath = "/api/v1/health"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5`,
   },
 };
 
-const INITIAL_TERMINAL_OUTPUT = [
-  { type: "system", text: "Garzaniti IT Interactive Shell v2.4" },
-  { type: "system", text: "Type 'help' or click quick actions to explore stack & freelance services." },
-  { type: "output", text: "Ready. Type a command below:" },
-];
-
 export default function ScrollShowcase() {
+  const { t, language } = useLanguage();
   const sectionRef = useRef(null);
   const terminalEndRef = useRef(null);
   const [activeTab, setActiveTab] = useState("backend");
@@ -112,21 +104,40 @@ export default function ScrollShowcase() {
 
   // Terminal State
   const [terminalInput, setTerminalInput] = useState("");
-  const [terminalHistory, setTerminalHistory] = useState(INITIAL_TERMINAL_OUTPUT);
+  const [terminalHistory, setTerminalHistory] = useState(() => [
+    {
+      type: "system",
+      text:
+        language === "es"
+          ? "Garzaniti IT Shell Interactivo v2.4"
+          : "Garzaniti IT Interactive Shell v2.4",
+    },
+    {
+      type: "system",
+      text:
+        language === "es"
+          ? "Escribí 'help' o hacé clic en los botones para explorar stack y servicios."
+          : "Type 'help' or click quick actions to explore stack & freelance services.",
+    },
+    {
+      type: "output",
+      text: language === "es" ? "Listo. Escribí un comando:" : "Ready. Type a command below:",
+    },
+  ]);
 
   useEffect(() => {
     const handleScroll = () => {
       if (!sectionRef.current) return;
       const rect = sectionRef.current.getBoundingClientRect();
       const windowHeight = window.innerHeight;
-      
+
       const totalScrollable = rect.height - windowHeight;
       if (totalScrollable <= 0) return;
 
       const currentScroll = -rect.top;
       const rawProgress = currentScroll / totalScrollable;
       const clamped = Math.min(Math.max(rawProgress, 0), 1);
-      
+
       setScrollProgress(clamped);
     };
 
@@ -141,57 +152,174 @@ export default function ScrollShowcase() {
     if (!cleanCmd) return;
 
     let response = [];
+    const isEs = language === "es";
+
     switch (cleanCmd) {
       case "help":
         response = [
-          { type: "output", text: "Available commands:" },
-          { type: "info", text: "  services   - List freelance software & automation offerings" },
-          { type: "info", text: "  n8n        - Inspect workflow automation capabilities" },
-          { type: "info", text: "  projects   - Show deployed client and academic systems" },
-          { type: "info", text: "  stack      - Display core engineering tech stack" },
-          { type: "info", text: "  contact    - Get direct email and booking links" },
-          { type: "info", text: "  clear      - Clear the terminal screen" },
+          { type: "output", text: isEs ? "Comandos disponibles:" : "Available commands:" },
+          {
+            type: "info",
+            text: isEs
+              ? "  services   - Lista de servicios de software y automatización"
+              : "  services   - List freelance software & automation offerings",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  n8n        - Capacidades del motor de automatización"
+              : "  n8n        - Inspect workflow automation capabilities",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  projects   - Sistemas y plataformas desplegadas"
+              : "  projects   - Show deployed client and academic systems",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  stack      - Tecnologías y herramientas principales"
+              : "  stack      - Display core engineering tech stack",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  contact    - Correo, WhatsApp y enlaces directos"
+              : "  contact    - Get direct email and booking links",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  clear      - Limpiar la pantalla de la terminal"
+              : "  clear      - Clear the terminal screen",
+          },
         ];
         break;
       case "services":
         response = [
-          { type: "output", text: "🚀 Freelance Engineering Services:" },
-          { type: "info", text: "  1. n8n Business Automation (Webhooks, CRM, WhatsApp/Slack, ERP sync)" },
-          { type: "info", text: "  2. Full-Stack Web Applications (React 19 + Python Django)" },
-          { type: "info", text: "  3. Custom Business Systems (Doctor-History, Suchus print shop ERP)" },
-          { type: "info", text: "  4. High-Performance Landing Pages & Cloud Architecture" },
+          {
+            type: "output",
+            text: isEs ? "🚀 Servicios de Ingeniería Freelance:" : "🚀 Freelance Engineering Services:",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  1. Automatización n8n (Webhooks, CRM, WhatsApp/Slack, Sincronización ERP)"
+              : "  1. n8n Business Automation (Webhooks, CRM, WhatsApp/Slack, ERP sync)",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  2. Aplicaciones Web Full-Stack (React 19 + Python Django)"
+              : "  2. Full-Stack Web Applications (React 19 + Python Django)",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  3. Sistemas de Gestión a Medida (Doctor-History, Suchus ERP)"
+              : "  3. Custom Business Systems (Doctor-History, Suchus print shop ERP)",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  4. Landing Pages de Alta Conversión y Arquitectura Cloud"
+              : "  4. High-Performance Landing Pages & Cloud Architecture",
+          },
         ];
         break;
       case "n8n":
         response = [
-          { type: "output", text: "⚡ n8n Workflow Automation Engine:" },
-          { type: "info", text: "  • Zero-manual overhead: Connect APIs, payment webhooks, database ETL" },
-          { type: "info", text: "  • Multi-channel alerts: WhatsApp, Telegram, Email, Notion sync" },
-          { type: "info", text: "  • Self-hosted on Docker or Cloud with 99.9% uptime" },
+          {
+            type: "output",
+            text: isEs
+              ? "⚡ Motor de Automatización n8n:"
+              : "⚡ n8n Workflow Automation Engine:",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  • Cero carga manual: Conexión de APIs, webhooks de cobro, ETL en PostgreSQL"
+              : "  • Zero-manual overhead: Connect APIs, payment webhooks, database ETL",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  • Alertas multicanal: WhatsApp Cloud API, Telegram, Email, Notion"
+              : "  • Multi-channel alerts: WhatsApp, Telegram, Email, Notion sync",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  • Auto-hospedado en Docker o Cloud con 99.9% uptime"
+              : "  • Self-hosted on Docker or Cloud with 99.9% uptime",
+          },
         ];
         break;
       case "projects":
         response = [
-          { type: "output", text: "📂 Recent Production Deliveries:" },
-          { type: "info", text: "  • CLUD2025: UTN Institutional Forum (React + Django + Neon DB)" },
-          { type: "info", text: "  • Suchus-Design: Commercial Print Shop Platform (Railway)" },
-          { type: "info", text: "  • DocTor-History: Clinical Records Management System" },
-          { type: "info", text: "  • Iron Bull Gym: Commercial Web App on Vercel" },
+          {
+            type: "output",
+            text: isEs ? "📂 Entregas Recientes en Producción:" : "📂 Recent Production Deliveries:",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  • CLUD2025: Foro Institucional UTN (React + Django + Neon DB)"
+              : "  • CLUD2025: UTN Institutional Forum (React + Django + Neon DB)",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  • Suchus-Design: Plataforma Comercial de Impresiones (Railway)"
+              : "  • Suchus-Design: Commercial Print Shop Platform (Railway)",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  • Wordle Game RN: Juego Móvil en React Native"
+              : "  • Wordle Game RN: Mobile Word Puzzle in React Native",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  • Iron Bull Gym: Web Comercial en Vercel"
+              : "  • Iron Bull Gym: Commercial Web App on Vercel",
+          },
         ];
         break;
       case "stack":
         response = [
-          { type: "output", text: "🛠️ Core Technologies:" },
-          { type: "info", text: "  Frontend: React 19, JavaScript ES6+, Vite, CSS3/Tailwind" },
-          { type: "info", text: "  Backend: Python, Django, Django REST Framework" },
-          { type: "info", text: "  Automation: n8n, Webhooks, REST Integrations, Docker" },
-          { type: "info", text: "  Databases & Cloud: PostgreSQL, MySQL, Railway, Vercel, AWS" },
+          {
+            type: "output",
+            text: isEs ? "🛠️ Tecnologías Principales:" : "🛠️ Core Technologies:",
+          },
+          {
+            type: "info",
+            text: "  Frontend: React 19, JavaScript ES6+, Vite, CSS3/Glassmorphism",
+          },
+          {
+            type: "info",
+            text: "  Backend: Python, Django, Django REST Framework, JWT",
+          },
+          {
+            type: "info",
+            text: "  Automation: n8n, Webhooks, WhatsApp Cloud API, Docker",
+          },
+          {
+            type: "info",
+            text: "  Databases & Cloud: PostgreSQL, Neon, MySQL, Railway, Vercel, AWS",
+          },
         ];
         break;
       case "contact":
         response = [
-          { type: "output", text: "📬 Direct Contact Channels:" },
+          {
+            type: "output",
+            text: isEs ? "📬 Canales de Contacto Directo:" : "📬 Direct Contact Channels:",
+          },
           { type: "info", text: "  Email: valenxity@gmail.com" },
+          { type: "info", text: "  WhatsApp: +54 221 354 2002" },
           { type: "info", text: "  LinkedIn: linkedin.com/in/valentín-garzaniti-216946238" },
           { type: "info", text: "  GitHub: github.com/Vgarzaniti" },
         ];
@@ -202,7 +330,12 @@ export default function ScrollShowcase() {
         return;
       default:
         response = [
-          { type: "error", text: `Command not found: "${cleanCmd}". Type 'help' for available commands.` },
+          {
+            type: "error",
+            text: isEs
+              ? `Comando no reconocido: "${cleanCmd}". Escribí 'help' para ver la lista.`
+              : `Command not found: "${cleanCmd}". Type 'help' for available commands.`,
+          },
         ];
         break;
     }
@@ -236,37 +369,23 @@ export default function ScrollShowcase() {
     <div className="scroll-showcase-wrapper" ref={sectionRef}>
       <div className="scroll-showcase-sticky">
         <div className="showcase-header">
-          <span className="showcase-pill">Interactive Developer Terminal</span>
-          <h2 className="showcase-title">
-            From <span className="highlight">n8n Automations</span> to{" "}
-            <span className="highlight">Full-Stack Cloud Platforms</span>
-          </h2>
-          <p className="showcase-subtitle">
-            Scroll to zoom into the workstation. Try the interactive terminal or inspect live code snippets.
-          </p>
+          <span className="showcase-pill">{t.showcase.pill}</span>
+          <h2 className="showcase-title">{t.showcase.title}</h2>
+          <p className="showcase-subtitle">{t.showcase.desc}</p>
         </div>
 
         {/* 3D Scene Container */}
         <div className="scene-container">
-          {/* Ambient Glow */}
           <div
-            className="ambient-glow"
+            className="laptop-3d"
             style={{
-              opacity: 0.4 + scrollProgress * 0.5,
-              transform: `scale(${0.9 + scrollProgress * 0.4})`,
-            }}
-          />
-
-          {/* 3D Laptop Device */}
-          <div
-            className="laptop-container"
-            style={{
-              transform: `perspective(1200px) rotateX(${rotateX}deg) translateY(${translateY}px) scale(${scale})`,
+              transform: `translate3d(0, ${translateY}px, 0) rotateX(${rotateX}deg) scale(${scale})`,
             }}
           >
             {/* Screen Lid */}
             <div className="laptop-screen">
-              <div className="laptop-camera">
+              {/* Webcam */}
+              <div className="screen-bezel-top">
                 <span className="camera-lens" />
               </div>
 
@@ -281,6 +400,7 @@ export default function ScrollShowcase() {
                 {/* Tabs */}
                 <div className="editor-tabs">
                   <button
+                    type="button"
                     onClick={() => setActiveTab("terminal")}
                     className={`editor-tab ${activeTab === "terminal" ? "active" : ""}`}
                   >
@@ -292,6 +412,7 @@ export default function ScrollShowcase() {
                   {Object.entries(CODE_SNIPPETS).map(([key, item]) => (
                     <button
                       key={key}
+                      type="button"
                       onClick={() => setActiveTab(key)}
                       className={`editor-tab ${activeTab === key ? "active" : ""}`}
                     >
@@ -309,12 +430,14 @@ export default function ScrollShowcase() {
               {activeTab === "terminal" ? (
                 <div className="terminal-body" ref={terminalEndRef}>
                   <div className="terminal-quick-actions">
-                    <span className="quick-label">Try commands:</span>
-                    <button onClick={() => handleCommandRun("services")} className="quick-chip">services</button>
-                    <button onClick={() => handleCommandRun("n8n")} className="quick-chip">n8n</button>
-                    <button onClick={() => handleCommandRun("projects")} className="quick-chip">projects</button>
-                    <button onClick={() => handleCommandRun("stack")} className="quick-chip">stack</button>
-                    <button onClick={() => handleCommandRun("contact")} className="quick-chip">contact</button>
+                    <span className="quick-label">
+                      {language === "es" ? "Comandos rápidos:" : "Try commands:"}
+                    </span>
+                    <button type="button" onClick={() => handleCommandRun("services")} className="quick-chip">services</button>
+                    <button type="button" onClick={() => handleCommandRun("n8n")} className="quick-chip">n8n</button>
+                    <button type="button" onClick={() => handleCommandRun("projects")} className="quick-chip">projects</button>
+                    <button type="button" onClick={() => handleCommandRun("stack")} className="quick-chip">stack</button>
+                    <button type="button" onClick={() => handleCommandRun("contact")} className="quick-chip">contact</button>
                   </div>
 
                   <div className="terminal-lines">
@@ -331,11 +454,17 @@ export default function ScrollShowcase() {
                       type="text"
                       value={terminalInput}
                       onChange={(e) => setTerminalInput(e.target.value)}
-                      placeholder="Type 'help', 'services', 'n8n'..."
+                      placeholder={
+                        language === "es"
+                          ? "Escribí 'help', 'services', 'n8n'..."
+                          : "Type 'help', 'services', 'n8n'..."
+                      }
                       className="terminal-input"
                       autoComplete="off"
                     />
-                    <button type="submit" className="terminal-send-btn">Run</button>
+                    <button type="submit" className="terminal-send-btn">
+                      {language === "es" ? "Ejecutar" : "Run"}
+                    </button>
                   </form>
                 </div>
               ) : (
@@ -357,7 +486,9 @@ export default function ScrollShowcase() {
                   <span className="status-dot-live" />
                   <span>
                     {activeTab === "terminal"
-                      ? "Interactive Shell • Connected"
+                      ? language === "es"
+                        ? "Shell Interactivo • Conectado"
+                        : "Interactive Shell • Connected"
                       : "main branch • 0 errors"}
                   </span>
                 </div>
@@ -370,13 +501,16 @@ export default function ScrollShowcase() {
               </div>
             </div>
 
-            {/* Laptop Base / Keyboard Bevel */}
+            {/* Laptop Base & Keyboard Plate */}
             <div className="laptop-base">
-              <div className="laptop-notch" />
+              <div className="keyboard-well">
+                <div className="keyboard-grid-mockup" />
+                <div className="trackpad" />
+              </div>
             </div>
           </div>
 
-          {/* 3D Floating Hologram Cards */}
+          {/* Floating Feature Hologram Cards */}
           <div
             className="floating-cards-layer"
             style={{
@@ -393,15 +527,13 @@ export default function ScrollShowcase() {
             >
               <div className="card-header">
                 <span className="card-icon">🔄</span>
-                <span className="card-title">n8n Automation</span>
-                <span className="badge-online">Active</span>
+                <span className="card-title">{t.showcase.cardAutomation.title}</span>
+                <span className="badge-online">{t.showcase.cardAutomation.badge}</span>
               </div>
-              <p className="card-desc">
-                Automating business processes, webhook triggers, CRM pipelines & WhatsApp sync.
-              </p>
+              <p className="card-desc">{t.showcase.cardAutomation.desc}</p>
               <div className="card-metric">
-                <span>Task Reduction: <strong>~85%</strong></span>
-                <span>Uptime: <strong>99.9%</strong></span>
+                <span>{t.showcase.cardAutomation.taskReduction} <strong>~85%</strong></span>
+                <span>{t.showcase.cardAutomation.uptime} <strong>99.9%</strong></span>
               </div>
             </div>
 
@@ -414,18 +546,18 @@ export default function ScrollShowcase() {
             >
               <div className="card-header">
                 <span className="card-icon">⚡</span>
-                <span className="card-title">Cloud Full-Stack</span>
-                <span className="badge-build">Passing</span>
+                <span className="card-title">{t.showcase.cardCloud.title}</span>
+                <span className="badge-build">{t.showcase.cardCloud.badge}</span>
               </div>
               <div className="terminal-mini">
                 <div className="terminal-row">
-                  <span className="t-green">✔</span> React 19 Frontend on Vercel
+                  <span className="t-green">✔</span> {t.showcase.cardCloud.item1}
                 </div>
                 <div className="terminal-row">
-                  <span className="t-green">✔</span> Django REST API on Railway
+                  <span className="t-green">✔</span> {t.showcase.cardCloud.item2}
                 </div>
                 <div className="terminal-row">
-                  <span className="t-accent">→</span> Serverless PostgreSQL (Neon)
+                  <span className="t-accent">→</span> {t.showcase.cardCloud.item3}
                 </div>
               </div>
             </div>
@@ -441,7 +573,7 @@ export default function ScrollShowcase() {
                 <span className="stack-chip">n8n Workflows</span>
                 <span className="stack-chip">React 19</span>
                 <span className="stack-chip">Python / Django</span>
-                <span className="stack-chip">Custom ERP & CRM</span>
+                <span className="stack-chip">PostgreSQL & Neon</span>
                 <span className="stack-chip">Railway & Vercel</span>
               </div>
             </div>
@@ -456,7 +588,7 @@ export default function ScrollShowcase() {
           <span className="mouse-icon">
             <span className="wheel" />
           </span>
-          <span>Scroll to expand the view</span>
+          <span>{t.showcase.scrollHint}</span>
         </div>
       </div>
     </div>

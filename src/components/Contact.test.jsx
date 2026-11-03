@@ -1,34 +1,43 @@
 import React from "react";
 import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { LanguageProvider } from "../context/LanguageContext";
 import Contact from "./Contact";
 
 describe("Contact component", () => {
-  it("renders the contact heading and form fields", () => {
-    render(<Contact />);
+  it("renders the contact heading and form fields in default Spanish", () => {
+    render(
+      <LanguageProvider>
+        <Contact />
+      </LanguageProvider>
+    );
 
-    expect(screen.getByText(/Let's Build Something Great/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Your Name \/ Company/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Work Email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Service Needed/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Project Description \/ Goals/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: /Iniciemos tu Próximo Proyecto/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/Tu Nombre/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Tu Correo Electrónico/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/¿En qué solución estás interesado\?/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Contanos sobre tu proyecto o necesidad/i)).toBeInTheDocument();
   });
 
   it("submits the inquiry form and displays confirmation", async () => {
-    render(<Contact />);
+    render(
+      <LanguageProvider>
+        <Contact />
+      </LanguageProvider>
+    );
 
-    fireEvent.change(screen.getByLabelText(/Your Name \/ Company/i), {
+    fireEvent.change(screen.getByLabelText(/Tu Nombre/i), {
       target: { value: "Valentin Test" },
     });
-    fireEvent.change(screen.getByLabelText(/Work Email/i), {
+    fireEvent.change(screen.getByLabelText(/Tu Correo Electrónico/i), {
       target: { value: "test@example.com" },
     });
-    fireEvent.change(screen.getByLabelText(/Project Description \/ Goals/i), {
-      target: { value: "Need n8n workflow for CRM automation." },
+    fireEvent.change(screen.getByLabelText(/Contanos sobre tu proyecto o necesidad/i), {
+      target: { value: "Necesito automatizar facturación con n8n." },
     });
 
-    fireEvent.click(screen.getByText(/Submit Project Request/i));
+    fireEvent.click(screen.getByText(/Enviar Consulta de Proyecto/i));
 
-    expect(await screen.findByText(/Inquiry Registered!/i)).toBeInTheDocument();
+    expect(await screen.findByText(/¡Consulta Registrada!/i)).toBeInTheDocument();
   });
 });

@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { LanguageProvider } from "./context/LanguageContext";
 
 import Layout from "./components/Layout";
 
@@ -11,19 +12,21 @@ const NotFound = lazy(() => import("./pages/notfound"));
 
 function App() {
   return (
-    <BrowserRouter>
-      <Suspense fallback={<div className="loader">Loading...</div>}>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="about" element={<AboutPage />} />
-            <Route path="projects" element={<ProjectsPage />} />
-            <Route path="contact" element={<ContactPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
+    <LanguageProvider>
+      <BrowserRouter>
+        <Suspense fallback={<div className="loader">Loading...</div>}>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="about" element={<AboutPage />} />
+              <Route path="projects" element={<ProjectsPage />} />
+              <Route path="contact" element={<ContactPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </LanguageProvider>
   );
 }
 

@@ -1,13 +1,6 @@
 import React, { useState } from "react";
+import { useLanguage } from "../context/LanguageContext";
 import "../styles/Contact.css";
-
-const SERVICES_OPTIONS = [
-  "n8n Workflow & Business Automation",
-  "Custom Full-Stack Web App & MVP (React + Django)",
-  "Bespoke Business Management System (ERP/CRM)",
-  "High-Converting Landing Page & Cloud Web Presence",
-  "General Software Consultation / Other",
-];
 
 // Official brand SVG icons
 const GitHubIcon = () => (
@@ -33,17 +26,19 @@ const GmailIcon = () => (
 );
 
 function Contact() {
+  const { t, language } = useLanguage();
   const [copied, setCopied] = useState(false);
   const email = "valenxity@gmail.com";
   const whatsappNumber = "5492213542002";
   const whatsappDisplay = "+54 221 354 2002";
-  const mailtoUrl = `mailto:${email}?subject=Project%20Inquiry%20-%20Garzaniti%20IT&body=Hi%20Valent%C3%ADn,%0A%0AI'm%20interested%20in%20discussing%20a%20project%20regarding%20...`;
+
+  const servicesOptions = t.contact.servicesOptions;
 
   // Form State
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    service: SERVICES_OPTIONS[0],
+    service: servicesOptions[0],
     budget: "$500 - $1,500",
     message: "",
   });
@@ -74,77 +69,72 @@ function Contact() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmitForm = async (e) => {
+  const handleSubmitForm = (e) => {
     e.preventDefault();
     setFormStatus("submitting");
 
-    const webhookUrl = import.meta.env?.VITE_CONTACT_WEBHOOK_URL;
-    const currentSubmission = { ...formData };
-
-    try {
-      if (webhookUrl) {
-        await fetch(webhookUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(currentSubmission),
-        });
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 600));
-      }
-      setSubmittedData(currentSubmission);
+    setTimeout(() => {
+      setSubmittedData({ ...formData });
       setFormStatus("success");
-      setFormData({
-        name: "",
-        email: "",
-        service: SERVICES_OPTIONS[0],
-        budget: "$500 - $1,500",
-        message: "",
-      });
-    } catch {
-      setFormStatus("error");
-    }
+    }, 400);
   };
 
-  const whatsappForwardUrl = submittedData
-    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-        `Hi Valentín! My name is ${submittedData.name} (${submittedData.email}).\n\nI'm inquiring about: ${submittedData.service}\nBudget: ${submittedData.budget}\n\nProject Details:\n${submittedData.message}`
-      )}`
+  const whatsappMessage = submittedData
+    ? language === "es"
+      ? `Hola Valentín! Te contacto por tu web de Garzaniti IT.%0A%0A*Nombre:* ${encodeURIComponent(submittedData.name)}%0A*Email:* ${encodeURIComponent(submittedData.email)}%0A*Servicio:* ${encodeURIComponent(submittedData.service)}%0A*Presupuesto:* ${encodeURIComponent(submittedData.budget)}%0A%0A*Mensaje:* ${encodeURIComponent(submittedData.message)}`
+      : `Hi Valentín! Contacting you from Garzaniti IT.%0A%0A*Name:* ${encodeURIComponent(submittedData.name)}%0A*Email:* ${encodeURIComponent(submittedData.email)}%0A*Service:* ${encodeURIComponent(submittedData.service)}%0A*Budget:* ${encodeURIComponent(submittedData.budget)}%0A%0A*Message:* ${encodeURIComponent(submittedData.message)}`
     : `https://wa.me/${whatsappNumber}?text=Hi%20Valent%C3%ADn,%20I'm%20contacting%20you%20from%20your%20portfolio.`;
 
-  const emailForwardUrl = submittedData
-    ? `mailto:${email}?subject=${encodeURIComponent(
-        `Project Inquiry: ${submittedData.service} - ${submittedData.name}`
-      )}&body=${encodeURIComponent(
-        `Hi Valentín,\n\nName: ${submittedData.name}\nEmail: ${submittedData.email}\nService: ${submittedData.service}\nBudget: ${submittedData.budget}\n\nMessage:\n${submittedData.message}`
-      )}`
-    : mailtoUrl;
+  const whatsappForwardUrl = submittedData
+    ? `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`
+    : `https://wa.me/${whatsappNumber}?text=Hola%20Valent%C3%ADn,%20te%20contacto%20desde%20tu%20portfolio.`;
+
+  const emailSubject = encodeURIComponent(
+    submittedData
+      ? `Proyecto: ${submittedData.service} - ${submittedData.name}`
+      : "Project Inquiry - Garzaniti IT"
+  );
+  const emailBody = encodeURIComponent(
+    submittedData
+      ? `Hola Valentín,\n\nSoy ${submittedData.name} (${submittedData.email}).\nMe interesa avanzar en: ${submittedData.service}.\nPresupuesto: ${submittedData.budget}.\n\nDetalles:\n${submittedData.message}`
+      : "Hi Valentín,\n\nI'm interested in discussing a project regarding..."
+  );
+  const emailForwardUrl = `mailto:${email}?subject=${emailSubject}&body=${emailBody}`;
 
   return (
     <section id="contact" className="contact-section">
-      <div className="section-badge">Get in Touch</div>
-      <h2 className="section-heading">Let's Build Something Great</h2>
-      <p className="contact-subtext">
-        Ready to automate your operations, build a custom full-stack platform, or launch your next product? Fill out the quick form below or reach out directly.
-      </p>
+      <div className="section-badge">{t.contact.badge}</div>
+      <h2 className="section-heading">{t.contact.heading}</h2>
+      <p className="contact-subtext">{t.contact.subtitle}</p>
 
       <div className="contact-container">
         {/* Quick Message Form */}
         <div className="contact-form-card">
           <div className="form-card-header">
             <span className="form-dot" />
-            <h3>Send a Direct Project Inquiry</h3>
-            <span className="form-badge">Average Response: &lt; 24h</span>
+            <h3>{t.contact.heading}</h3>
+            <span className="form-badge">
+              {language === "es" ? "Respuesta: < 2h" : "Average Response: < 2h"}
+            </span>
           </div>
 
           {formStatus === "success" ? (
             <div className="form-success-box">
               <span className="success-icon">🎉</span>
-              <h4>Inquiry Registered!</h4>
-              <p>Thank you! Your project details have been captured.</p>
+              <h4>{t.contact.success.title}</h4>
+              <p>{t.contact.success.desc}</p>
 
               <div className="instant-dispatch-box">
-                <span className="dispatch-title">Want an instant answer right now?</span>
-                <p className="dispatch-sub">Forward your inquiry directly to my WhatsApp or Email:</p>
+                <span className="dispatch-title">
+                  {language === "es"
+                    ? "¿Querés continuar la conversación al instante?"
+                    : "Want an instant conversation right now?"}
+                </span>
+                <p className="dispatch-sub">
+                  {language === "es"
+                    ? "Reenviá tu consulta directo a mi WhatsApp o correo:"
+                    : "Forward your inquiry directly to my WhatsApp or Email:"}
+                </p>
                 <div className="dispatch-buttons">
                   <a
                     href={whatsappForwardUrl}
@@ -153,52 +143,57 @@ function Contact() {
                     className="dispatch-btn dispatch-wa"
                   >
                     <WhatsAppIcon />
-                    <span>Send to WhatsApp Now ↗</span>
+                    <span>{t.contact.success.whatsappBtn}</span>
                   </a>
                   <a
                     href={emailForwardUrl}
                     className="dispatch-btn dispatch-mail"
                   >
                     <GmailIcon />
-                    <span>Send to Email Client ↗</span>
+                    <span>
+                      {language === "es"
+                        ? "✉️ Enviar a Cliente de Mail ↗"
+                        : "✉️ Send to Email Client ↗"}
+                    </span>
                   </a>
                 </div>
               </div>
 
               <button
+                type="button"
                 onClick={() => {
                   setFormStatus("idle");
                   setSubmittedData(null);
                 }}
                 className="reset-form-btn"
               >
-                ← Send another message
+                {t.contact.success.newInquiryBtn}
               </button>
             </div>
           ) : (
             <form onSubmit={handleSubmitForm} className="inquiry-form">
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="name">Your Name / Company *</label>
+                  <label htmlFor="name">{t.contact.form.nameLabel}</label>
                   <input
                     id="name"
                     name="name"
                     type="text"
                     required
-                    placeholder="e.g. Alex Smith / Acme Corp"
+                    placeholder={t.contact.form.namePlaceholder}
                     value={formData.name}
                     onChange={handleInputChange}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="email">Work Email *</label>
+                  <label htmlFor="email">{t.contact.form.emailLabel}</label>
                   <input
                     id="email"
                     name="email"
                     type="email"
                     required
-                    placeholder="alex@company.com"
+                    placeholder={t.contact.form.emailPlaceholder}
                     value={formData.email}
                     onChange={handleInputChange}
                   />
@@ -207,14 +202,14 @@ function Contact() {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="service">Service Needed</label>
+                  <label htmlFor="service">{t.contact.form.serviceLabel}</label>
                   <select
                     id="service"
                     name="service"
                     value={formData.service}
                     onChange={handleInputChange}
                   >
-                    {SERVICES_OPTIONS.map((srv, idx) => (
+                    {servicesOptions.map((srv, idx) => (
                       <option key={idx} value={srv}>
                         {srv}
                       </option>
@@ -223,29 +218,29 @@ function Contact() {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="budget">Estimated Budget</label>
+                  <label htmlFor="budget">{t.contact.form.budgetLabel}</label>
                   <select
                     id="budget"
                     name="budget"
                     value={formData.budget}
                     onChange={handleInputChange}
                   >
-                    <option value="<$500">&lt; $500 USD (Quick automation / task)</option>
-                    <option value="$500 - $1,500">$500 - $1,500 USD (Landing / n8n workflow)</option>
-                    <option value="$1,500 - $3,000">$1,500 - $3,000 USD (Full-Stack MVP / Portal)</option>
-                    <option value=">$3,000">&gt; $3,000 USD (Comprehensive bespoke system)</option>
+                    <option value="<$500">&lt; $500 USD</option>
+                    <option value="$500 - $1,500">$500 - $1,500 USD</option>
+                    <option value="$1,500 - $3,000">$1,500 - $3,000 USD</option>
+                    <option value=">$3,000">&gt; $3,000 USD</option>
                   </select>
                 </div>
               </div>
 
               <div className="form-group">
-                <label htmlFor="message">Project Description / Goals *</label>
+                <label htmlFor="message">{t.contact.form.messageLabel}</label>
                 <textarea
                   id="message"
                   name="message"
                   rows="4"
                   required
-                  placeholder="Tell me a bit about what you're looking to build, automate, or improve..."
+                  placeholder={t.contact.form.messagePlaceholder}
                   value={formData.message}
                   onChange={handleInputChange}
                 />
@@ -256,14 +251,12 @@ function Contact() {
                 disabled={formStatus === "submitting"}
                 className={`submit-inquiry-btn ${formStatus === "submitting" ? "submitting" : ""}`}
               >
-                {formStatus === "submitting" ? "Sending Details..." : "🚀 Submit Project Request"}
+                {formStatus === "submitting"
+                  ? language === "es"
+                    ? "Enviando Consulta..."
+                    : "Sending Details..."
+                  : t.contact.form.submitBtn}
               </button>
-
-              {formStatus === "error" && (
-                <div className="form-error-msg">
-                  Something went wrong sending the form. Please use the direct email link below instead.
-                </div>
-              )}
             </form>
           )}
         </div>
@@ -287,12 +280,14 @@ function Contact() {
                 <span className="platform-icon-badge in-badge">in</span>
               </div>
               <div className="rich-meta">
-                <span className="rich-name">Valentín Augusto Garzaniti</span>
+                <span className="rich-name">{t.contact.direct.linkedinTitle}</span>
                 <span className="rich-handle">LinkedIn Profile ↗</span>
               </div>
-              <span className="network-pill">Connect ↗</span>
+              <span className="network-pill">
+                {t.contact.direct.linkedinAction}
+              </span>
             </div>
-            <p className="rich-bio">Information Systems Engineering @ UTN FRLP • Full-Stack & n8n Developer.</p>
+            <p className="rich-bio">{t.contact.direct.linkedinRole}</p>
             <div className="rich-card-footer">
               <span className="rich-tag">Systems Architecture</span>
               <span className="rich-tag">Full-Stack</span>
@@ -311,14 +306,16 @@ function Contact() {
                 <WhatsAppIcon />
               </div>
               <div className="rich-meta">
-                <span className="rich-name">WhatsApp Direct</span>
+                <span className="rich-name">{t.contact.direct.whatsappTitle}</span>
                 <span className="rich-handle">{whatsappDisplay}</span>
               </div>
-              <span className="status-live-pill">● Online</span>
+              <span className="status-live-pill">{t.contact.direct.whatsappStatus}</span>
             </div>
-            <p className="rich-bio">Instant messaging for quick questions, quotes & project kickoff.</p>
+            <p className="rich-bio">{t.contact.direct.whatsappDesc}</p>
             <div className="rich-card-footer">
-              <span className="rich-action-label">Start WhatsApp Chat ↗</span>
+              <span className="rich-action-label">
+                {language === "es" ? "Iniciar Chat de WhatsApp ↗" : "Start WhatsApp Chat ↗"}
+              </span>
             </div>
           </a>
 
@@ -334,12 +331,16 @@ function Contact() {
                 <GitHubIcon />
               </div>
               <div className="rich-meta">
-                <span className="rich-name">GitHub</span>
+                <span className="rich-name">{t.contact.direct.githubTitle}</span>
                 <span className="rich-handle">@Vgarzaniti • Full-Stack</span>
               </div>
-              <span className="gh-badge">15 Repos</span>
+              <span className="gh-badge">{t.contact.direct.githubBadge}</span>
             </div>
-            <p className="rich-bio">Open source code, CLUD2025, Suchus-Design, DocTor-History & Wordle RN.</p>
+            <p className="rich-bio">
+              {language === "es"
+                ? "Código abierto, CLUD2025, Suchus-Design, DocTor-History y Wordle RN."
+                : "Open source code, CLUD2025, Suchus-Design, DocTor-History & Wordle RN."}
+            </p>
             <div className="rich-card-footer">
               <span className="rich-tag">React</span>
               <span className="rich-tag">Django</span>
@@ -354,16 +355,19 @@ function Contact() {
                 <GmailIcon />
               </div>
               <div className="rich-meta">
-                <span className="rich-name">Gmail</span>
+                <span className="rich-name">{t.contact.direct.emailTitle}</span>
                 <span className="rich-handle">{email}</span>
               </div>
             </div>
+            <p className="rich-bio" style={{ margin: "0.4rem 0 0.8rem", fontSize: "0.82rem", color: "#94a3b8" }}>
+              {t.contact.direct.emailDesc}
+            </p>
             <div className="rich-mail-actions">
-              <button onClick={handleCopyEmail} className="rich-mail-btn copy">
-                {copied ? "✔ Copied!" : "📋 Copy Email"}
+              <button type="button" onClick={handleCopyEmail} className="rich-mail-btn copy">
+                {copied ? `✔ ${t.contact.copiedBtn}` : `📋 ${t.contact.copyBtn}`}
               </button>
-              <a href={mailtoUrl} className="rich-mail-btn send">
-                Open Client ↗
+              <a href={emailForwardUrl} className="rich-mail-btn send">
+                {language === "es" ? "Abrir Cliente ↗" : "Open Client ↗"}
               </a>
             </div>
           </div>

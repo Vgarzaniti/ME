@@ -1,36 +1,48 @@
 import React from "react";
 import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { LanguageProvider } from "../context/LanguageContext";
 import About from "./About";
 
-describe("About component with Unified 3D Architecture Rig", () => {
-  it("renders about credentials and the unified architecture stage", () => {
-    render(<About />);
+describe("About component with Bento Grid Cards", () => {
+  it("renders about credentials and the bento cards in default Spanish", () => {
+    render(
+      <LanguageProvider>
+        <About />
+      </LanguageProvider>
+    );
 
-    expect(screen.getByText(/About Me & Skills Architecture/i)).toBeInTheDocument();
-    expect(screen.getByText(/The Full-Stack Architecture Rig/i)).toBeInTheDocument();
-    expect(screen.getByText(/Unified System Canvas • Zero Cards/i)).toBeInTheDocument();
-    expect(screen.getByText("SERVER RACK")).toBeInTheDocument();
-    expect(screen.getByText("CLOUD TOWER")).toBeInTheDocument();
+    expect(screen.getByText(/Sobre Mí y Laboratorio de Habilidades/i)).toBeInTheDocument();
+    expect(screen.getByText(/Pilares Técnicos Principales/i)).toBeInTheDocument();
+    expect(screen.getByText(/Python, Django REST & PostgreSQL/i)).toBeInTheDocument();
+    expect(screen.getByText(/React 19, CSS 3D Moderno y Estado/i)).toBeInTheDocument();
+    expect(screen.getByText(/Motor n8n, Webhooks e Integraciones/i)).toBeInTheDocument();
   });
 
-  it("interacts with the database blade query button", () => {
-    render(<About />);
+  it("interacts with the live React state counter in Bento 2", () => {
+    render(
+      <LanguageProvider>
+        <About />
+      </LanguageProvider>
+    );
 
-    const dbQueryBtn = screen.getByRole("button", { name: /Query Database Blade/i });
-    expect(dbQueryBtn).toBeInTheDocument();
+    const stateBtn = screen.getByRole("button", { name: /Estado:/i });
+    expect(screen.getByText(/42/i)).toBeInTheDocument();
 
-    fireEvent.click(dbQueryBtn);
-    expect(screen.getByText(/Q#2 • 18ms latency/i)).toBeInTheDocument();
+    fireEvent.click(stateBtn);
+    expect(screen.getByText(/43/i)).toBeInTheDocument();
   });
 
-  it("triggers the n8n data pulse in the conduit system", () => {
-    render(<About />);
+  it("executes the SQL query benchmark in Bento 1", () => {
+    render(
+      <LanguageProvider>
+        <About />
+      </LanguageProvider>
+    );
 
-    const n8nPulseBtn = screen.getByRole("button", { name: /Fire n8n Data Pulse/i });
-    expect(n8nPulseBtn).toBeInTheDocument();
+    const runBtn = screen.getByRole("button", { name: /Ejecutar Consulta/i });
+    fireEvent.click(runBtn);
 
-    fireEvent.click(n8nPulseBtn);
-    expect(n8nPulseBtn).toHaveClass("active");
+    expect(screen.getByText(/4 filas devueltas/i)).toBeInTheDocument();
   });
 });

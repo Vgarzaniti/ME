@@ -1,36 +1,35 @@
 import React from "react";
+import { useLanguage } from "../context/LanguageContext";
 import "../styles/Hero.css";
 
 function Hero() {
+  const { t } = useLanguage();
+
   return (
     <section className="hero" id="hero">
       <div className="hero-badge">
         <span className="hero-status-pulse" />
-        <span>Available for new projects & full-stack roles</span>
+        <span>{t.hero.badge}</span>
       </div>
 
       <h1 className="hero-title">
-        Hi, I'm <span className="highlight-gradient">Valentín Augusto Garzaniti</span> 👋
+        {t.hero.greeting} <span className="highlight-gradient">{t.hero.name}</span> 👋
       </h1>
-      <h2 className="hero-role">Garzaniti IT • Full-Stack Engineer & Systems Specialist</h2>
+      <h2 className="hero-role">{t.hero.role}</h2>
 
-      <p className="hero-description">
-        I architect and engineer resilient web applications, RESTful APIs, and cloud deployments
-        with <strong>React</strong>, <strong>Python / Django</strong>, and modern cloud infrastructure
-        like <strong>Railway</strong>, <strong>Vercel</strong>, and <strong>AWS</strong>.
-      </p>
+      <p className="hero-description">{t.hero.description}</p>
 
       <div className="hero-actions">
         <a href="#projects" className="btn btn-primary">
-          Explore Projects →
+          {t.hero.exploreBtn}
         </a>
         <a href="#contact" className="btn btn-secondary">
-          Get in Touch
+          {t.hero.contactBtn}
         </a>
       </div>
 
       <div className="hero-tech-strip">
-        <span className="strip-label">Core Ecosystem:</span>
+        <span className="strip-label">{t.hero.ecosystemLabel}</span>
         <div className="strip-tags">
           <span className="strip-tag">React 19</span>
           <span className="strip-tag">Python</span>
