@@ -11,7 +11,7 @@ export default function VirtualAssistant() {
 
   // Assistant states
   const [isMinimized, setIsMinimized] = useState(false);
-  const [bubbleText, setBubbleText] = useState("");
+  const [activeMessage, setActiveMessage] = useState(null);
   const [isBubbleVisible, setIsBubbleVisible] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
   const [tipIndex, setTipIndex] = useState(0);
@@ -22,11 +22,31 @@ export default function VirtualAssistant() {
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
 
   const bubbleTimeoutRef = useRef(null);
+  const isInitialMount = useRef(true);
+
+  // Helper to resolve localized text from the active message descriptor
+  const getMessageText = useCallback((msg, currentT) => {
+    if (!msg || !currentT?.assistant) return "";
+    switch (msg.type) {
+      case "greeting":
+        return currentT.assistant.defaultGreeting;
+      case "contextual":
+        return currentT.assistant.contextual?.[msg.section] || currentT.assistant.defaultGreeting;
+      case "tip": {
+        const tips = currentT.assistant.idleTips || [];
+        return tips[msg.index % tips.length] || currentT.assistant.defaultGreeting;
+      }
+      case "langChange":
+        return currentT.assistant.langChanged || currentT.assistant.defaultGreeting;
+      default:
+        return msg.custom || currentT.assistant.defaultGreeting;
+    }
+  }, []);
 
   // Show a speech bubble with auto-hide timer
-  const showBubble = useCallback((text, duration = 8500) => {
-    if (!text) return;
-    setBubbleText(text);
+  const showBubble = useCallback((msgDescriptor, duration = 8500) => {
+    if (!msgDescriptor) return;
+    setActiveMessage(msgDescriptor);
     setIsBubbleVisible(true);
 
     if (bubbleTimeoutRef.current) {
@@ -55,7 +75,7 @@ export default function VirtualAssistant() {
     if (tips.length > 0) {
       const nextIndex = (tipIndex + 1) % tips.length;
       setTipIndex(nextIndex);
-      showBubble(tips[nextIndex]);
+      showBubble({ type: "tip", index: nextIndex });
     }
   };
 
@@ -65,8 +85,8 @@ export default function VirtualAssistant() {
       const normX = (e.clientX / window.innerWidth) * 2 - 1;
       const normY = (e.clientY / window.innerHeight) * 2 - 1;
       setTilt({
-        rotateY: normX * 18, // horizontal tilt deg
-        rotateX: -normY * 14, // vertical tilt deg
+        rotateY: normX * 18,
+        rotateX: -normY * 14,
       });
     };
 
@@ -89,10 +109,7 @@ export default function VirtualAssistant() {
           if (viewportMid >= top - 120) {
             if (activeSection !== id) {
               setActiveSection(id);
-              const contextualMsg = t.assistant?.contextual?.[id];
-              if (contextualMsg) {
-                showBubble(contextualMsg, 7000);
-              }
+              showBubble({ type: "contextual", section: id }, 7000);
             }
             break;
           }
@@ -102,16 +119,31 @@ export default function VirtualAssistant() {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [activeSection, t.assistant, showBubble]);
+  }, [activeSection, showBubble]);
 
-  // Initial greeting after mounting
+  // Initial greeting after mounting (defaulting to Spanish)
   useEffect(() => {
     const greetingTimer = setTimeout(() => {
-      showBubble(t.assistant?.defaultGreeting || "¡Hola! 👋 Soy el clon 3D de Valentín.", 9000);
-    }, 2500);
+      showBubble({ type: "greeting" }, 9000);
+    }, 2200);
 
     return () => clearTimeout(greetingTimer);
-  }, [t.assistant, showBubble]);
+  }, [showBubble]);
+
+  // React immediately to language switches:
+  // 1. Re-render any active bubble in the new language.
+  // 2. Animate avatar jump and announce the language change!
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    // Avatar reacts and speaks in the newly chosen language
+    setIsJumping(true);
+    setTimeout(() => setIsJumping(false), 600);
+    showBubble({ type: "langChange" }, 7500);
+  }, [language, showBubble]);
 
   // Periodic random tips every 28 seconds if idle
   useEffect(() => {
@@ -119,8 +151,8 @@ export default function VirtualAssistant() {
       if (!isBubbleVisible && !isMinimized) {
         const tips = t.assistant?.idleTips || [];
         if (tips.length > 0) {
-          const randTip = tips[Math.floor(Math.random() * tips.length)];
-          showBubble(randTip, 8000);
+          const randIndex = Math.floor(Math.random() * tips.length);
+          showBubble({ type: "tip", index: randIndex }, 8000);
         }
       }
     }, 28000);
@@ -143,7 +175,6 @@ export default function VirtualAssistant() {
       loader.load(
         modelPath,
         (gltf) => {
-          // If GLB exists, set up Three.js canvas
           setHasGlbModel(true);
           const width = 140;
           const height = 140;
@@ -194,13 +225,15 @@ export default function VirtualAssistant() {
     }
   }, [tilt]);
 
+  const renderedBubbleText = getMessageText(activeMessage, t);
+
   return (
     <aside
       className={`virtual-assistant-container ${isMinimized ? "assistant-minimized" : ""}`}
       aria-label={t.assistant?.ariaLabel || "Asistente Virtual 3D de Valentín"}
     >
       {/* Interactive Speech Bubble */}
-      {isBubbleVisible && !isMinimized && (
+      {isBubbleVisible && !isMinimized && renderedBubbleText && (
         <div className="assistant-speech-bubble" role="status" aria-live="polite">
           <button
             type="button"
@@ -215,7 +248,7 @@ export default function VirtualAssistant() {
             <span className="assistant-name">Valentín 3D</span>
             <span className="assistant-badge">{t.assistant?.statusOnline || "En línea"}</span>
           </div>
-          <p className="bubble-text">{bubbleText}</p>
+          <p className="bubble-text">{renderedBubbleText}</p>
           <div className="bubble-quick-actions">
             <a
               href="https://wa.me/5492213542002"
@@ -223,10 +256,10 @@ export default function VirtualAssistant() {
               rel="noreferrer"
               className="bubble-action-link"
             >
-              💬 WhatsApp
+              💬 {t.assistant?.ctaWhatsApp || "WhatsApp"}
             </a>
             <a href="#projects" className="bubble-action-link">
-              🚀 {language === "es" ? "Proyectos" : "Projects"}
+              🚀 {t.assistant?.ctaProjects || "Proyectos"}
             </a>
           </div>
           <span className="bubble-tail" />

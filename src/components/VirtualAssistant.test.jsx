@@ -1,7 +1,7 @@
 import React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import { LanguageProvider } from "../context/LanguageContext";
+import { LanguageProvider, useLanguage } from "../context/LanguageContext";
 import VirtualAssistant from "./VirtualAssistant";
 
 // Mock Three.js WebGLRenderer & GLTFLoader
@@ -32,8 +32,21 @@ vi.mock("three/examples/jsm/loaders/GLTFLoader.js", () => {
   };
 });
 
+// Helper component to trigger language change in tests
+function LanguageSwitchTestWrapper() {
+  const { toggleLanguage, language } = useLanguage();
+  return (
+    <div>
+      <button type="button" onClick={toggleLanguage}>
+        Current: {language}
+      </button>
+      <VirtualAssistant />
+    </div>
+  );
+}
+
 describe("VirtualAssistant component", () => {
-  it("renders assistant stage and toggle button", () => {
+  it("renders assistant stage and toggle button in default Spanish", () => {
     render(
       <LanguageProvider>
         <VirtualAssistant />
@@ -74,5 +87,29 @@ describe("VirtualAssistant component", () => {
 
     expect(screen.getByText("Valentín 3D")).toBeInTheDocument();
     expect(screen.getByText("En línea")).toBeInTheDocument();
+  });
+
+  it("updates assistant dialogue and buttons dynamically when language switches", () => {
+    render(
+      <LanguageProvider>
+        <LanguageSwitchTestWrapper />
+      </LanguageProvider>
+    );
+
+    // Switch to English
+    const toggleLangBtn = screen.getByText("Current: es");
+    act(() => {
+      fireEvent.click(toggleLangBtn);
+    });
+
+    // Assistant should announce in English
+    expect(
+      screen.getByText(/Switched to English/i)
+    ).toBeInTheDocument();
+
+    // Quick action buttons should be localized
+    expect(screen.getByText("Online")).toBeInTheDocument();
+    expect(screen.getByText(/Chat on WhatsApp/i)).toBeInTheDocument();
+    expect(screen.getByText(/Browse Projects/i)).toBeInTheDocument();
   });
 });
