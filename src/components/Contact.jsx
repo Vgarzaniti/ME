@@ -338,8 +338,8 @@ function Contact() {
             </div>
             <p className="rich-bio">
               {language === "es"
-                ? "Código abierto, CLUD2025, Suchus-Design, DocTor-History y Wordle RN."
-                : "Open source code, CLUD2025, Suchus-Design, DocTor-History & Wordle RN."}
+                ? "Código abierto: CLUD2025, CineMind, ART-scan, ATV y DocTor-History."
+                : "Open source projects: CLUD2025, CineMind, ART-scan, ATV & DocTor-History."}
             </p>
             <div className="rich-card-footer">
               <span className="rich-tag">React</span>

@@ -217,8 +217,8 @@ export default function ScrollShowcase() {
           {
             type: "info",
             text: isEs
-              ? "  3. Sistemas de Gestión a Medida (Doctor-History, Suchus ERP)"
-              : "  3. Custom Business Systems (Doctor-History, Suchus print shop ERP)",
+              ? "  3. Sistemas de Gestión a Medida (DocTor-History, MAS Control)"
+              : "  3. Custom Business Systems (DocTor-History, MAS Control ERP)",
           },
           {
             type: "info",
@@ -260,31 +260,43 @@ export default function ScrollShowcase() {
         response = [
           {
             type: "output",
-            text: isEs ? "📂 Entregas Recientes en Producción:" : "📂 Recent Production Deliveries:",
+            text: isEs ? "📂 Entregas & Repositorios Destacados:" : "📂 Featured Projects & Repositories:",
           },
           {
             type: "info",
             text: isEs
-              ? "  • CLUD2025: Foro Institucional UTN (React + Django + Neon DB)"
-              : "  • CLUD2025: UTN Institutional Forum (React + Django + Neon DB)",
+              ? "  • CLUD2025: Foro Institucional UTN (React + Django REST + Neon DB • Demo en Vivo)"
+              : "  • CLUD2025: UTN Institutional Forum (React + Django REST + Neon DB • Live Demo)",
           },
           {
             type: "info",
             text: isEs
-              ? "  • Suchus-Design: Plataforma Comercial de Impresiones (Railway)"
-              : "  • Suchus-Design: Commercial Print Shop Platform (Railway)",
+              ? "  • CineMind: Hub Inteligente de Recomendación de Películas (React 19 + Python • Demo en Vivo)"
+              : "  • CineMind: Intelligent Film Recommendation Hub (React 19 + Python • Live Demo)",
           },
           {
             type: "info",
             text: isEs
-              ? "  • Wordle Game RN: Juego Móvil en React Native"
-              : "  • Wordle Game RN: Mobile Word Puzzle in React Native",
+              ? "  • ART-scan: Realidad Aumentada & Control de Stock (WebAR + TensorFlow.js • Repo)"
+              : "  • ART-scan: WebAR Inventory System (WebAR + TensorFlow.js • Repo)",
           },
           {
             type: "info",
             text: isEs
-              ? "  • Iron Bull Gym: Web Comercial en Vercel"
-              : "  • Iron Bull Gym: Commercial Web App on Vercel",
+              ? "  • ATV: Motor Algorítmico Determinístico para DJs (Python + NumPy + Grafos • Repo)"
+              : "  • ATV: Deterministic Autonomous DJ Engine (Python + NumPy + Graphs • Repo)",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  • DocTor-History: Gestión Médica y Reportes PDF (Python + MySQL + ReportLab • Repo)"
+              : "  • DocTor-History: Medical Clinical Records & PDF Reporting (Python + MySQL • Repo)",
+          },
+          {
+            type: "info",
+            text: isEs
+              ? "  • MAS Control: Control Operativo de Extintores & Trazabilidad (React + Python + QR • Repo)"
+              : "  • MAS Control: Industrial Fire Safety & Extinguisher ERP (React + Python + QR • Repo)",
           },
         ];
         break;

@@ -42,11 +42,12 @@ DevOps:      Docker, Railway, Vercel, AWS, Git, GitHub Actions CI/CD
 
 | Project | Stack | Description | Status |
 |:---|:---|:---|:---:|
-| **[CLUD2025](https://clud2025.vercel.app/)** | `React` `Django` `PostgreSQL` | Institutional forum & platform for UTN with neon.tech DB & Render API | 🟢 Live Demo |
-| **[Suchus-Design](https://suchus-design.vercel.app/)** | `React` `Django` `MySQL` | Full-stack commercial platform for professional print shop on Railway | 🟢 Live Demo |
-| **[DocTor-History](https://github.com/Vgarzaniti/DocTor-History)** | `Python` `Relational DB` | Clinical & medical records management system for doctors | 💻 Repository |
-| **[Iron Bull Gym](https://v0-iron-bull-website.vercel.app/)** | `React` `Vercel` | Modern high-converting commercial web presence for fitness business | 🟢 Live Demo |
-| **[Wordle Game RN](https://github.com/Mauricitoxx/APLI-MOVIL-FINAL)** | `React Native` `Mobile` | Cross-platform mobile word game with levels & persistence | 📱 Repository |
+| **[CLUD2025](https://clud2025.vercel.app/)** | `React` `Django REST` `PostgreSQL` | Institutional forum for UTN with neon.tech serverless DB & Render backend | 🟢 [Live Demo](https://clud2025.vercel.app/) • [Repo](https://github.com/Vgarzaniti/Clud2025) |
+| **[CineMind](https://cine-mind-umber.vercel.app/)** | `React 19` `Python` `Tailwind` | Intelligent film recommendation & catalog platform containerized with Docker | 🟢 [Live Demo](https://cine-mind-umber.vercel.app/) • [Repo](https://github.com/Vgarzaniti/CineMind) |
+| **[ART-scan](https://github.com/Vgarzaniti/ART-scan)** | `JavaScript` `WebAR` `TensorFlow.js` | Intelligent inventory tracking via WebAR camera recognition & QR scanner | 💻 [Repository](https://github.com/Vgarzaniti/ART-scan) |
+| **[ATV](https://github.com/Vgarzaniti/ATV)** | `Python` `NumPy` `Camelot DSP` | Algorithmic deterministic DJ transition engine with harmonic audio graphs | 💻 [Repository](https://github.com/Vgarzaniti/ATV) |
+| **[DocTor-History](https://github.com/Vgarzaniti/DocTor-History)** | `Python` `MySQL` `ReportLab` | Encrypted clinical records management system with automated PDF generation | 💻 [Repository](https://github.com/Vgarzaniti/DocTor-History) |
+| **[MAS Control](https://github.com/Vgarzaniti/mas-control)** | `React` `Python` `PostgreSQL` | Industrial fire safety & extinguisher maintenance tracking platform with QR | 💻 [Repository](https://github.com/Vgarzaniti/mas-control) |
 
 ---
 

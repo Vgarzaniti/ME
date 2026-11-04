@@ -78,7 +78,7 @@ function Projects() {
             </div>
 
             <div className="project-footer">
-              {p.deployed ? (
+              {p.link && (
                 <a href={p.link} target="_blank" rel="noreferrer" className="project-action-btn btn-view">
                   {t.projects.launchDemo}
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -87,7 +87,8 @@ function Projects() {
                     <line x1="10" y1="14" x2="21" y2="3" />
                   </svg>
                 </a>
-              ) : (
+              )}
+              {p.github && (
                 <a href={p.github} target="_blank" rel="noreferrer" className="project-action-btn btn-repo">
                   {t.projects.viewCode}
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
