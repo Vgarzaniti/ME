@@ -19,6 +19,7 @@ export default function VirtualAssistant() {
   const jumpAnimRef = useRef(0);
   const avatarRef = useRef(null);
   const headRef = useRef(null);
+  const eyesGroupRef = useRef(null);
   const bubbleTimeoutRef = useRef(null);
 
   // Show a speech bubble with auto-hide timer
@@ -114,36 +115,44 @@ export default function VirtualAssistant() {
     const container = mountRef.current;
     if (!container) return;
 
-    const width = 136;
-    const height = 136;
+    const width = 140;
+    const height = 140;
 
     // Scene & Camera
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    camera.position.set(0, 0.2, 3.2);
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
+    camera.position.set(0, 0.22, 3.1);
 
     // Renderer (graceful fallback if WebGL is unavailable or in test environment)
     let renderer;
     try {
-      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
     } catch {
       return;
     }
+
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     container.appendChild(renderer.domElement);
 
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
+    // 3-Point Studio Lighting (Key, Fill, Rim Light)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0x00ff88, 1.2);
-    dirLight.position.set(2, 3, 2);
-    scene.add(dirLight);
+    // Warm Key Light (top right)
+    const keyLight = new THREE.DirectionalLight(0xfffaed, 2.0);
+    keyLight.position.set(2.5, 3.5, 2.5);
+    scene.add(keyLight);
 
-    const rimLight = new THREE.DirectionalLight(0x38bdf8, 1.0);
-    rimLight.position.set(-2, 1, -1);
+    // Cool Soft Fill Light (left)
+    const fillLight = new THREE.DirectionalLight(0x93c5fd, 1.2);
+    fillLight.position.set(-2.5, 1.5, 1.5);
+    scene.add(fillLight);
+
+    // Vibrant Mint Rim Light (back) - highlights hair silhouette and shoulders
+    const rimLight = new THREE.DirectionalLight(0x00ff88, 2.8);
+    rimLight.position.set(0, 2.5, -2.5);
     scene.add(rimLight);
 
     // Master avatar group
@@ -151,172 +160,313 @@ export default function VirtualAssistant() {
     scene.add(masterGroup);
     avatarRef.current = masterGroup;
 
-    // Holographic Base Ring
-    const ringGeo = new THREE.TorusGeometry(0.85, 0.025, 16, 64);
+    // Holographic Base Ring Platform
+    const holoRingGroup = new THREE.Group();
+    holoRingGroup.position.y = -0.82;
+    masterGroup.add(holoRingGroup);
+
     const ringMat = new THREE.MeshBasicMaterial({
       color: 0x00ff88,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.8,
     });
-    const holoRing = new THREE.Mesh(ringGeo, ringMat);
-    holoRing.rotation.x = Math.PI / 2;
-    holoRing.position.y = -0.78;
-    masterGroup.add(holoRing);
+    const innerRing = new THREE.Mesh(new THREE.TorusGeometry(0.82, 0.025, 16, 64), ringMat);
+    innerRing.rotation.x = Math.PI / 2;
+    holoRingGroup.add(innerRing);
 
-    // Outer faint pulse ring
-    const outerRingGeo = new THREE.TorusGeometry(1.05, 0.015, 16, 64);
     const outerRingMat = new THREE.MeshBasicMaterial({
       color: 0x38bdf8,
       transparent: true,
+      opacity: 0.45,
+    });
+    const outerRing = new THREE.Mesh(new THREE.TorusGeometry(1.02, 0.015, 16, 64), outerRingMat);
+    outerRing.rotation.x = Math.PI / 2;
+    holoRingGroup.add(outerRing);
+
+    // Contact shadow disc on floor
+    const shadowMat = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      transparent: true,
       opacity: 0.35,
     });
-    const outerRing = new THREE.Mesh(outerRingGeo, outerRingMat);
-    outerRing.rotation.x = Math.PI / 2;
-    outerRing.position.y = -0.82;
-    masterGroup.add(outerRing);
+    const shadowDisc = new THREE.Mesh(new THREE.CircleGeometry(0.7, 32), shadowMat);
+    shadowDisc.rotation.x = -Math.PI / 2;
+    shadowDisc.position.y = -0.01;
+    holoRingGroup.add(shadowDisc);
 
-    // Check if custom GLB exists, otherwise build stylized procedural avatar
+    // Try loading custom GLB if present, otherwise build polished stylized human character
     let customModelLoaded = false;
     const loader = new GLTFLoader();
 
-    const buildProceduralAvatar = () => {
+    const buildStylizedHumanAvatar = () => {
       if (customModelLoaded) return;
 
       const bodyGroup = new THREE.Group();
       masterGroup.add(bodyGroup);
 
-      // Materials matching user photo (dark wavy hair, warm skin, charcoal t-shirt)
+      // --- High-End Stylized Materials ---
+      // Warm, natural skin with soft sub-surface sheen
       const skinMat = new THREE.MeshStandardMaterial({
-        color: 0xe0a885,
-        roughness: 0.65,
-        metalness: 0.05,
+        color: 0xf0c2a2,
+        roughness: 0.52,
+        metalness: 0.04,
       });
-      const hairMat = new THREE.MeshStandardMaterial({
-        color: 0x1f1612,
-        roughness: 0.85,
-        metalness: 0.1,
-      });
-      const beardMat = new THREE.MeshStandardMaterial({
-        color: 0x2c1f19,
-        roughness: 0.9,
-        metalness: 0.05,
-      });
-      const shirtMat = new THREE.MeshStandardMaterial({
-        color: 0x27272a,
-        roughness: 0.8,
-        metalness: 0.1,
-      });
-      const eyeMat = new THREE.MeshStandardMaterial({
-        color: 0x18181b,
-        roughness: 0.1,
-        metalness: 0.5,
-      });
-      const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
-      // Torso & Shoulders (charcoal t-shirt)
-      const torsoGeo = new THREE.CylinderGeometry(0.55, 0.65, 0.7, 24);
-      const torsoMesh = new THREE.Mesh(torsoGeo, shirtMat);
-      torsoMesh.position.y = -0.55;
-      bodyGroup.add(torsoMesh);
+      // Dark espresso hair with subtle specular gloss
+      const hairMat = new THREE.MeshStandardMaterial({
+        color: 0x1d1410,
+        roughness: 0.58,
+        metalness: 0.12,
+      });
+
+      // Neat facial hair stubble & eyebrows
+      const beardMat = new THREE.MeshStandardMaterial({
+        color: 0x231712,
+        roughness: 0.72,
+        metalness: 0.08,
+      });
+
+      // Dark charcoal tech crewneck / t-shirt
+      const shirtMat = new THREE.MeshStandardMaterial({
+        color: 0x1e2430,
+        roughness: 0.75,
+        metalness: 0.1,
+      });
+
+      // Cyber mint accent trim
+      const accentMat = new THREE.MeshStandardMaterial({
+        color: 0x00ff88,
+        roughness: 0.3,
+        metalness: 0.4,
+        emissive: 0x00ff88,
+        emissiveIntensity: 0.25,
+      });
+
+      // Expressive eyes
+      const eyeWhiteMat = new THREE.MeshStandardMaterial({
+        color: 0xf8fafc,
+        roughness: 0.2,
+      });
+      const irisMat = new THREE.MeshStandardMaterial({
+        color: 0x3d261a,
+        roughness: 0.15,
+        metalness: 0.1,
+      });
+      const pupilMat = new THREE.MeshBasicMaterial({ color: 0x0f0b09 });
+      const catchlightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+      // --- Torso & Shoulders (Sculpted Developer Bust) ---
+      const torsoGroup = new THREE.Group();
+      torsoGroup.position.set(0, -0.62, 0);
+      bodyGroup.add(torsoGroup);
+
+      // Main chest/torso
+      const chestGeo = new THREE.CylinderGeometry(0.52, 0.64, 0.65, 32);
+      chestGeo.scale(1.15, 1, 0.78);
+      const chestMesh = new THREE.Mesh(chestGeo, shirtMat);
+      torsoGroup.add(chestMesh);
+
+      // Left Shoulder Cap
+      const leftShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.24, 20, 20), shirtMat);
+      leftShoulder.scale.set(1.1, 0.9, 0.9);
+      leftShoulder.position.set(-0.55, 0.2, 0);
+      torsoGroup.add(leftShoulder);
+
+      // Right Shoulder Cap
+      const rightShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.24, 20, 20), shirtMat);
+      rightShoulder.scale.set(1.1, 0.9, 0.9);
+      rightShoulder.position.set(0.55, 0.2, 0);
+      torsoGroup.add(rightShoulder);
+
+      // Crewneck Collar Rim
+      const collarGeo = new THREE.TorusGeometry(0.25, 0.035, 16, 32);
+      collarGeo.scale(1.1, 0.8, 1);
+      const collarMesh = new THREE.Mesh(collarGeo, accentMat);
+      collarMesh.rotation.x = Math.PI / 2;
+      collarMesh.position.set(0, 0.34, 0.02);
+      torsoGroup.add(collarMesh);
 
       // Neck
-      const neckGeo = new THREE.CylinderGeometry(0.18, 0.22, 0.3, 16);
+      const neckGeo = new THREE.CylinderGeometry(0.17, 0.2, 0.28, 24);
+      neckGeo.scale(1, 1, 0.9);
       const neckMesh = new THREE.Mesh(neckGeo, skinMat);
-      neckMesh.position.y = -0.15;
+      neckMesh.position.set(0, -0.16, 0.01);
       bodyGroup.add(neckMesh);
 
-      // Head Group (rotates with cursor tracking)
+      // --- Head & Face Group (Follows Cursor Tracking) ---
       const headGroup = new THREE.Group();
-      headGroup.position.set(0, 0.18, 0);
+      headGroup.position.set(0, 0.16, 0);
       bodyGroup.add(headGroup);
       headRef.current = headGroup;
 
-      // Head / Face
-      const headGeo = new THREE.SphereGeometry(0.42, 24, 24);
-      headGeo.scale(0.9, 1.05, 0.95);
+      // Base Cranium / Head
+      const headGeo = new THREE.SphereGeometry(0.42, 32, 32);
+      headGeo.scale(0.88, 1.05, 0.94);
       const headMesh = new THREE.Mesh(headGeo, skinMat);
       headGroup.add(headMesh);
 
-      // Dark Wavy Hair - Sculpted curls & volume
-      const hairCapGeo = new THREE.SphereGeometry(0.44, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.55);
-      hairCapGeo.scale(0.95, 1.08, 1.0);
-      const hairCapMesh = new THREE.Mesh(hairCapGeo, hairMat);
-      hairCapMesh.position.set(0, 0.04, -0.02);
-      headGroup.add(hairCapMesh);
+      // Defined Jawline & Chin
+      const chinGeo = new THREE.SphereGeometry(0.2, 24, 24);
+      chinGeo.scale(1.1, 0.75, 0.95);
+      const chinMesh = new THREE.Mesh(chinGeo, skinMat);
+      chinMesh.position.set(0, -0.26, 0.17);
+      headGroup.add(chinMesh);
 
-      // Curly Hair Clusters (matching user's front wavy volume)
-      const curls = [
-        { x: 0, y: 0.44, z: 0.12, r: 0.16 },
-        { x: -0.16, y: 0.42, z: 0.1, r: 0.14 },
-        { x: 0.16, y: 0.41, z: 0.1, r: 0.14 },
-        { x: -0.28, y: 0.32, z: 0.05, r: 0.13 },
-        { x: 0.28, y: 0.31, z: 0.05, r: 0.13 },
-        { x: -0.08, y: 0.46, z: 0.04, r: 0.15 },
-        { x: 0.08, y: 0.47, z: 0.02, r: 0.15 },
+      // Stylized Ears
+      const earGeo = new THREE.SphereGeometry(0.1, 16, 16);
+      earGeo.scale(0.4, 0.9, 0.6);
+
+      const leftEar = new THREE.Mesh(earGeo, skinMat);
+      leftEar.position.set(-0.38, 0.02, -0.02);
+      leftEar.rotation.y = -0.2;
+      headGroup.add(leftEar);
+
+      const rightEar = new THREE.Mesh(earGeo, skinMat);
+      rightEar.position.set(0.38, 0.02, -0.02);
+      rightEar.rotation.y = 0.2;
+      headGroup.add(rightEar);
+
+      // --- Wavy Styled Hair (Cohesive Sculpted Volume) ---
+      const hairGroup = new THREE.Group();
+      headGroup.add(hairGroup);
+
+      // Main Hair Cap Volume
+      const mainHairGeo = new THREE.SphereGeometry(0.44, 28, 28, 0, Math.PI * 2, 0, Math.PI * 0.58);
+      mainHairGeo.scale(0.92, 1.08, 0.98);
+      const mainHairMesh = new THREE.Mesh(mainHairGeo, hairMat);
+      mainHairMesh.position.set(0, 0.06, -0.03);
+      hairGroup.add(mainHairMesh);
+
+      // Back Taper
+      const backHairGeo = new THREE.SphereGeometry(0.36, 20, 20, 0, Math.PI * 2, Math.PI * 0.4, Math.PI * 0.45);
+      backHairGeo.scale(0.95, 1, 0.95);
+      const backHairMesh = new THREE.Mesh(backHairGeo, hairMat);
+      backHairMesh.position.set(0, -0.08, -0.1);
+      hairGroup.add(backHairMesh);
+
+      // Curled Front Wavy Locks (Sculpted flowing waves matching photo)
+      const frontWaveCurls = [
+        // Front center crest (prominent wavy volume)
+        { x: 0, y: 0.42, z: 0.22, sx: 0.22, sy: 0.16, sz: 0.18, rz: 0.1 },
+        { x: -0.14, y: 0.41, z: 0.2, sx: 0.19, sy: 0.15, sz: 0.16, rz: -0.2 },
+        { x: 0.14, y: 0.4, z: 0.2, sx: 0.19, sy: 0.15, sz: 0.16, rz: 0.25 },
+        // Front forehead curl sweep
+        { x: -0.05, y: 0.34, z: 0.34, sx: 0.14, sy: 0.11, sz: 0.12, rz: 0.3 },
+        { x: 0.08, y: 0.33, z: 0.33, sx: 0.13, sy: 0.1, sz: 0.12, rz: -0.2 },
+        // Side volume
+        { x: -0.26, y: 0.32, z: 0.16, sx: 0.16, sy: 0.14, sz: 0.15, rz: -0.35 },
+        { x: 0.26, y: 0.31, z: 0.16, sx: 0.16, sy: 0.14, sz: 0.15, rz: 0.35 },
+        // Top crown lifts
+        { x: -0.08, y: 0.48, z: 0.06, sx: 0.2, sy: 0.15, sz: 0.18, rz: 0.15 },
+        { x: 0.08, y: 0.49, z: 0.04, sx: 0.2, sy: 0.15, sz: 0.18, rz: -0.15 },
       ];
-      curls.forEach(({ x, y, z, r }) => {
-        const curlGeo = new THREE.SphereGeometry(r, 12, 12);
-        const curlMesh = new THREE.Mesh(curlGeo, hairMat);
+
+      frontWaveCurls.forEach(({ x, y, z, sx, sy, sz, rz }) => {
+        const curlMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), hairMat);
+        curlMesh.scale.set(sx, sy, sz);
         curlMesh.position.set(x, y, z);
-        headGroup.add(curlMesh);
+        curlMesh.rotation.z = rz;
+        hairGroup.add(curlMesh);
       });
 
-      // Eyes
-      const leftWhite = new THREE.Mesh(new THREE.SphereGeometry(0.075, 12, 12), eyeWhiteMat);
-      leftWhite.scale.set(1.2, 0.7, 0.6);
-      leftWhite.position.set(-0.16, 0.04, 0.36);
-      headGroup.add(leftWhite);
+      // --- Eyes (Expressive, Warm & Lifelike) ---
+      const eyesGroup = new THREE.Group();
+      headGroup.add(eyesGroup);
+      eyesGroupRef.current = eyesGroup;
 
-      const leftPupil = new THREE.Mesh(new THREE.SphereGeometry(0.045, 12, 12), eyeMat);
-      leftPupil.position.set(-0.16, 0.04, 0.395);
-      headGroup.add(leftPupil);
+      const createEye = (isLeft) => {
+        const sign = isLeft ? -1 : 1;
+        const eyeUnit = new THREE.Group();
+        eyeUnit.position.set(sign * 0.155, 0.04, 0.34);
 
-      const rightWhite = new THREE.Mesh(new THREE.SphereGeometry(0.075, 12, 12), eyeWhiteMat);
-      rightWhite.scale.set(1.2, 0.7, 0.6);
-      rightWhite.position.set(0.16, 0.04, 0.36);
-      headGroup.add(rightWhite);
+        // Sclera (White of eye)
+        const sclera = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 16), eyeWhiteMat);
+        sclera.scale.set(1.2, 0.72, 0.6);
+        eyeUnit.add(sclera);
 
-      const rightPupil = new THREE.Mesh(new THREE.SphereGeometry(0.045, 12, 12), eyeMat);
-      rightPupil.position.set(0.16, 0.04, 0.395);
-      headGroup.add(rightPupil);
+        // Iris (Rich warm brown)
+        const iris = new THREE.Mesh(new THREE.SphereGeometry(0.042, 16, 16), irisMat);
+        iris.scale.set(1, 1, 0.35);
+        iris.position.set(0, 0, 0.035);
+        eyeUnit.add(iris);
 
-      // Eyebrows
-      const browGeo = new THREE.BoxGeometry(0.13, 0.025, 0.04);
-      const leftBrow = new THREE.Mesh(browGeo, beardMat);
-      leftBrow.position.set(-0.16, 0.12, 0.38);
-      leftBrow.rotation.z = 0.05;
+        // Pupil (Deep dark core)
+        const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.024, 16, 16), pupilMat);
+        pupil.scale.set(1, 1, 0.35);
+        pupil.position.set(0, 0, 0.048);
+        eyeUnit.add(pupil);
+
+        // Catchlight (Bright white life sparkle)
+        const catchlight = new THREE.Mesh(new THREE.SphereGeometry(0.012, 10, 10), catchlightMat);
+        catchlight.position.set(0.014, 0.014, 0.055);
+        eyeUnit.add(catchlight);
+
+        return eyeUnit;
+      };
+
+      const leftEye = createEye(true);
+      const rightEye = createEye(false);
+      eyesGroup.add(leftEye);
+      eyesGroup.add(rightEye);
+
+      // --- Arched Eyebrows (Sculpted matching photo) ---
+      const browMat = beardMat;
+      const browGeo = new THREE.BoxGeometry(0.14, 0.024, 0.03);
+
+      const leftBrow = new THREE.Mesh(browGeo, browMat);
+      leftBrow.position.set(-0.16, 0.12, 0.36);
+      leftBrow.rotation.z = 0.08;
       headGroup.add(leftBrow);
 
-      const rightBrow = new THREE.Mesh(browGeo, beardMat);
-      rightBrow.position.set(0.16, 0.12, 0.38);
-      rightBrow.rotation.z = -0.05;
+      const rightBrow = new THREE.Mesh(browGeo, browMat);
+      rightBrow.position.set(0.16, 0.12, 0.36);
+      rightBrow.rotation.z = -0.08;
       headGroup.add(rightBrow);
 
-      // Beard & Moustache (neatly trimmed stubble)
-      const beardGeo = new THREE.SphereGeometry(0.39, 16, 16, 0, Math.PI * 2, Math.PI * 0.45, Math.PI * 0.45);
-      beardGeo.scale(0.92, 1.05, 0.98);
-      const beardMesh = new THREE.Mesh(beardGeo, beardMat);
-      beardMesh.position.set(0, -0.06, 0.02);
-      headGroup.add(beardMesh);
+      // Nose Contour (Soft minimal nose)
+      const noseGeo = new THREE.CylinderGeometry(0.03, 0.05, 0.14, 12);
+      noseGeo.scale(1, 1, 0.7);
+      const noseMesh = new THREE.Mesh(noseGeo, skinMat);
+      noseMesh.position.set(0, -0.02, 0.4);
+      noseMesh.rotation.x = -0.25;
+      headGroup.add(noseMesh);
 
-      // Dev glasses accent (minimalist developer touch)
-      const glassesFrameMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
-      const frameGeo = new THREE.TorusGeometry(0.09, 0.012, 10, 24);
-      const leftGlass = new THREE.Mesh(frameGeo, glassesFrameMat);
-      leftGlass.position.set(-0.16, 0.04, 0.4);
-      headGroup.add(leftGlass);
+      // --- Beard & Mustache (Neat Minimalist Facial Hair) ---
+      const facialHairGroup = new THREE.Group();
+      headGroup.add(facialHairGroup);
 
-      const rightGlass = new THREE.Mesh(frameGeo, glassesFrameMat);
-      rightGlass.position.set(0.16, 0.04, 0.4);
-      headGroup.add(rightGlass);
+      // Mustache (curved bar above lips)
+      const stacheGeo = new THREE.BoxGeometry(0.16, 0.03, 0.04);
+      const mustache = new THREE.Mesh(stacheGeo, beardMat);
+      mustache.position.set(0, -0.11, 0.38);
+      facialHairGroup.add(mustache);
 
-      const bridgeGeo = new THREE.BoxGeometry(0.08, 0.015, 0.01);
-      const bridge = new THREE.Mesh(bridgeGeo, glassesFrameMat);
-      bridge.position.set(0, 0.045, 0.4);
-      headGroup.add(bridge);
+      // Chin goatee / beard patch
+      const goateeGeo = new THREE.SphereGeometry(0.14, 16, 16);
+      goateeGeo.scale(1.2, 0.8, 0.6);
+      const goatee = new THREE.Mesh(goateeGeo, beardMat);
+      goatee.position.set(0, -0.27, 0.26);
+      facialHairGroup.add(goatee);
+
+      // Jawline beard contour
+      const jawBeardGeo = new THREE.TorusGeometry(0.32, 0.04, 12, 32, Math.PI * 0.9);
+      jawBeardGeo.scale(0.85, 0.9, 0.85);
+      const jawBeard = new THREE.Mesh(jawBeardGeo, beardMat);
+      jawBeard.rotation.x = Math.PI * 0.6;
+      jawBeard.position.set(0, -0.16, 0.1);
+      facialHairGroup.add(jawBeard);
+
+      // Friendly Smile Line
+      const mouthGeo = new THREE.TorusGeometry(0.06, 0.01, 8, 16, Math.PI * 0.7);
+      const mouthMat = new THREE.MeshStandardMaterial({ color: 0xc47b6a, roughness: 0.6 });
+      const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+      mouth.rotation.x = Math.PI * 0.9;
+      mouth.rotation.z = -Math.PI * 0.15;
+      mouth.position.set(0, -0.17, 0.38);
+      headGroup.add(mouth);
     };
 
-    // Try loading custom model if URL is resolvable, otherwise build procedural
+    // Try loading custom model if URL is resolvable, otherwise build stylized human avatar
     try {
       const origin = window.location?.origin && window.location.origin !== "null"
         ? window.location.origin
@@ -335,11 +485,11 @@ export default function VirtualAssistant() {
         },
         undefined,
         () => {
-          buildProceduralAvatar();
+          buildStylizedHumanAvatar();
         }
       );
     } catch {
-      buildProceduralAvatar();
+      buildStylizedHumanAvatar();
     }
 
     // Mouse Tracking Coordinates
@@ -362,24 +512,34 @@ export default function VirtualAssistant() {
       animationFrameId = requestAnimationFrame(animate);
       const elapsed = (performance.now() - startTime) * 0.001;
 
-      // Gentle breathing & floating
+      // Gentle floating breathing motion
       let jumpOffset = 0;
       if (jumpAnimRef.current > 0) {
         jumpOffset = Math.sin(jumpAnimRef.current * Math.PI) * 0.35;
         jumpAnimRef.current = Math.max(0, jumpAnimRef.current - 0.04);
       }
 
-      masterGroup.position.y = Math.sin(elapsed * 2.2) * 0.05 + jumpOffset;
+      masterGroup.position.y = Math.sin(elapsed * 2.2) * 0.04 + jumpOffset;
 
       // Holographic ring rotations
-      holoRing.rotation.z = elapsed * 0.8;
-      outerRing.rotation.z = -elapsed * 0.4;
-      holoRing.material.opacity = 0.55 + Math.sin(elapsed * 3) * 0.2;
+      innerRing.rotation.z = elapsed * 0.8;
+      outerRing.rotation.z = -elapsed * 0.45;
+      innerRing.material.opacity = 0.6 + Math.sin(elapsed * 3) * 0.25;
 
       // Smooth gaze tracking
       if (headRef.current) {
         headRef.current.rotation.y += (targetRotY - headRef.current.rotation.y) * 0.08;
         headRef.current.rotation.x += (targetRotX - headRef.current.rotation.x) * 0.08;
+      }
+
+      // Natural eye blinking micro-animation every 4 seconds
+      if (eyesGroupRef.current) {
+        const blinkCycle = elapsed % 4.0;
+        if (blinkCycle < 0.12) {
+          eyesGroupRef.current.scale.y = 0.1;
+        } else {
+          eyesGroupRef.current.scale.y = 1.0;
+        }
       }
 
       renderer.render(scene, camera);

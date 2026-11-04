@@ -17,7 +17,8 @@
   pointer-events: auto;
   position: relative;
   margin-bottom: 12px;
-  max-width: 280px;
+  width: 280px;
+  max-width: min(280px, calc(100vw - 36px));
   background: rgba(10, 15, 24, 0.94);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
