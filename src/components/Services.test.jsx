@@ -16,6 +16,7 @@ describe("Services Interactive Mini-Web Sandbox", () => {
     expect(screen.getByRole("tab", { name: /Tienda & SaaS/i })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: /n8n & WhatsApp Bot/i })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: /Sistema ERP & Gestión/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /Conciliación & Impuestos/i })).toBeInTheDocument();
   });
 
   it("adds a product to cart and updates cart count in the Store Demo", () => {
@@ -69,5 +70,30 @@ describe("Services Interactive Mini-Web Sandbox", () => {
 
     // Revenue increased from 38,450 to 39,650
     expect(screen.getByText(/\$39,650/i)).toBeInTheDocument();
+  });
+
+  it("switches to Tax Reconciliation & Reports tab and opens the fiscal report modal", () => {
+    render(
+      <LanguageProvider>
+        <Services />
+      </LanguageProvider>
+    );
+
+    const taxTab = screen.getByRole("tab", { name: /Conciliación & Impuestos/i });
+    fireEvent.click(taxTab);
+
+    expect(
+      screen.getByText(/Motor de Conciliación Impositiva & Reportes Automatizados/i)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/RET-ARBA-2026-9941/i)).toBeInTheDocument();
+
+    const exportReportBtn = screen.getByRole("button", {
+      name: /Generar Libro IVA & Reporte Fiscal/i,
+    });
+    fireEvent.click(exportReportBtn);
+
+    expect(
+      screen.getByText(/Reporte Fiscal & Libro IVA Digital Generado/i)
+    ).toBeInTheDocument();
   });
 });

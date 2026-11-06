@@ -202,6 +202,91 @@ export default function Services() {
   const [erpRevenue, setErpRevenue] = useState(38450);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
 
+  // ==========================================
+  // 4. TAX RECONCILIATION & AUTO-REPORTS STATE
+  // ==========================================
+  const [isReconciling, setIsReconciling] = useState(false);
+  const [isTaxReconciled, setIsTaxReconciled] = useState(false);
+  const [isTaxReportModalOpen, setIsTaxReportModalOpen] = useState(false);
+
+  const taxRecords = [
+    {
+      voucher: "FC-A-0004-00018492",
+      source: "AFIP / ARCA ↔ Banco Galicia",
+      taxType: isEs ? "IVA Débito Fiscal (21%)" : "Output VAT (21%)",
+      base: "$4,200.00",
+      taxAmount: "$882.00",
+      status: "matched",
+    },
+    {
+      voucher: "RET-ARBA-2026-9941",
+      source: "Padrón ARBA ↔ Extracto SIRCREB",
+      taxType: isEs ? "Retención IIBB Bs.As. (3.5%)" : "Gross Income Withholding (3.5%)",
+      base: "$12,500.00",
+      taxAmount: "$437.50",
+      status: isTaxReconciled ? "autofixed" : "diff",
+    },
+    {
+      voucher: "FC-A-0002-00009104",
+      source: "Proveedor Cloud ↔ Libro IVA Compras",
+      taxType: isEs ? "IVA Crédito Fiscal (21%)" : "Input VAT Credit (21%)",
+      base: "$1,950.00",
+      taxAmount: "$409.50",
+      status: "matched",
+    },
+    {
+      voucher: "PERC-AFIP-88310",
+      source: "AFIP Mis Retenciones ↔ ERP",
+      taxType: isEs ? "Percepción IVA RG 2408" : "VAT Perception RG 2408",
+      base: "$9,830.00",
+      taxAmount: isTaxReconciled ? "$983.00" : "$940.00",
+      status: isTaxReconciled ? "autofixed" : "diff",
+    },
+  ];
+
+  const handleRunTaxReconciliation = () => {
+    if (isReconciling) return;
+    setIsReconciling(true);
+
+    setNetworkLog({
+      method: "POST",
+      endpoint: "/api/v1/tax/reconcile-batch",
+      status: 202,
+      latency: "31ms",
+      response: {
+        job: "afip_arba_bank_cross_match",
+        vouchers_scanned: 148,
+        discrepancies_detected: 2,
+        action: "auto_adjusting_withholding_certificates",
+      },
+    });
+
+    setTimeout(() => {
+      setIsReconciling(false);
+      setIsTaxReconciled(true);
+      setToastMessage(
+        isEs
+          ? "✔ Conciliación completada: 100% de comprobantes y retenciones cuadrados"
+          : "✔ Reconciliation complete: 100% of invoices & withholdings matched"
+      );
+      setTimeout(() => setToastMessage(null), 3200);
+
+      setNetworkLog({
+        method: "POST",
+        endpoint: "/api/v1/tax/reconcile-batch/commit",
+        status: 200,
+        latency: "19ms",
+        response: {
+          status: "reconciled",
+          match_accuracy: "100.0%",
+          net_vat_position: "$4,890.00",
+          withholdings_recovered: "$1,420.50",
+          libro_iva_digital: "READY_FOR_EXPORT",
+        },
+      });
+    }, 650);
+  };
+
   const handleAddTransaction = () => {
     const nextIdNum = 493 + erpTransactions.length - 3;
     const newTx = {
@@ -253,7 +338,7 @@ export default function Services() {
           whatsapp_api: "connected",
         },
       });
-    } else {
+    } else if (appId === "erp") {
       setNetworkLog({
         method: "GET",
         endpoint: "/api/v1/erp/dashboard/metrics",
@@ -263,6 +348,18 @@ export default function Services() {
           tenant: "garzaniti_erp_cloud",
           monthly_revenue: erpRevenue,
           audit_compliance: "passed",
+        },
+      });
+    } else if (appId === "tax") {
+      setNetworkLog({
+        method: "GET",
+        endpoint: "/api/v1/tax/reconciliation/status",
+        status: 200,
+        latency: "12ms",
+        response: {
+          sources: ["AFIP_ARCA_WSFE", "ARBA_SIRCREB", "BANK_STATEMENT_CSV"],
+          period: "2026-11",
+          auto_reports: "ReportLab PDF + OpenPyXL",
         },
       });
     }
@@ -315,6 +412,16 @@ export default function Services() {
             >
               <span className="tab-title-text">{miniWeb.tabs.erp.title}</span>
               <span className="tab-badge-pill">{miniWeb.tabs.erp.badge}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeApp === "tax"}
+              onClick={() => handleSelectApp("tax")}
+              className={`browser-tab ${activeApp === "tax" ? "active" : ""}`}
+            >
+              <span className="tab-title-text">{miniWeb.tabs.tax.title}</span>
+              <span className="tab-badge-pill">{miniWeb.tabs.tax.badge}</span>
             </button>
           </div>
 
@@ -559,6 +666,11 @@ export default function Services() {
                       >
                         <option value="n8n Automation & Workflows">
                           {isEs ? "Automatización n8n & Flujos" : "n8n Automation & Workflows"}
+                        </option>
+                        <option value="Tax Reconciliation & Automated Reports">
+                          {isEs
+                            ? "Conciliación de Impuestos & Reportes Automatizados"
+                            : "Tax Reconciliation & Automated Reports"}
                         </option>
                         <option value="Full-Stack Web MVP (React 19)">
                           {isEs ? "MVP Full-Stack (React 19)" : "Full-Stack Web MVP (React 19)"}
@@ -819,6 +931,173 @@ export default function Services() {
                         className="pdf-close-btn"
                       >
                         {miniWeb.erp.pdfClose}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* TAB 4: TAX RECONCILIATION & AUTOMATED REPORTS ENGINE     */}
+          {/* ======================================================== */}
+          {activeApp === "tax" && (
+            <div className="mini-app-canvas erp-app tax-app">
+              <div className="erp-top-bar">
+                <div>
+                  <h3 className="erp-heading">{miniWeb.tax.title}</h3>
+                  <span className="erp-subheading">{miniWeb.tax.desc}</span>
+                </div>
+
+                <div className="erp-actions-bar">
+                  <button
+                    type="button"
+                    onClick={handleRunTaxReconciliation}
+                    disabled={isReconciling}
+                    className="erp-btn btn-add"
+                  >
+                    {isReconciling ? miniWeb.tax.btnReconciling : miniWeb.tax.btnReconcile}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsTaxReportModalOpen(true)}
+                    className="erp-btn btn-export"
+                  >
+                    {miniWeb.tax.btnExportTaxReport}
+                  </button>
+                </div>
+              </div>
+
+              {/* Tax & Fiscal KPI Stat Cards */}
+              <div className="erp-kpi-grid">
+                <div className="erp-kpi-card">
+                  <span className="kpi-label">{miniWeb.tax.kpi1Label}</span>
+                  <div className="kpi-val">{isTaxReconciled ? "$4,890.00" : "$4,933.00"}</div>
+                  <span className="kpi-badge positive">{miniWeb.tax.kpi1Sub}</span>
+                </div>
+
+                <div className="erp-kpi-card">
+                  <span className="kpi-label">{miniWeb.tax.kpi2Label}</span>
+                  <div className="kpi-val">{miniWeb.tax.kpi2Val}</div>
+                  <span className="kpi-badge neutral">{miniWeb.tax.kpi2Sub}</span>
+                </div>
+
+                <div className="erp-kpi-card">
+                  <span className="kpi-label">{miniWeb.tax.kpi3Label}</span>
+                  <div className="kpi-val">{isTaxReconciled ? "100.0%" : "94.2%"}</div>
+                  <span className="kpi-badge highlight">{miniWeb.tax.kpi3Sub}</span>
+                </div>
+              </div>
+
+              {/* Tax Reconciliation Cross-Match Table */}
+              <div className="erp-table-container">
+                <div className="table-header-row">
+                  <h4>{miniWeb.tax.tableTitle}</h4>
+                  <span className="row-count">
+                    {isTaxReconciled
+                      ? isEs
+                        ? "0 desvíos pendientes"
+                        : "0 pending discrepancies"
+                      : isEs
+                      ? "2 desvíos detectados"
+                      : "2 discrepancies detected"}
+                  </span>
+                </div>
+
+                <div className="table-responsive-box">
+                  <table className="erp-table">
+                    <thead>
+                      <tr>
+                        <th>{miniWeb.tax.colVoucher}</th>
+                        <th>{miniWeb.tax.colSource}</th>
+                        <th>{miniWeb.tax.colTaxType}</th>
+                        <th>{miniWeb.tax.colBase}</th>
+                        <th>{miniWeb.tax.colTaxAmount}</th>
+                        <th>{miniWeb.tax.colStatus}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {taxRecords.map((rec, idx) => (
+                        <tr key={idx} className="erp-row">
+                          <td className="code-cell">{rec.voucher}</td>
+                          <td className="client-cell">{rec.source}</td>
+                          <td>{rec.taxType}</td>
+                          <td>{rec.base}</td>
+                          <td className="amount-cell">{rec.taxAmount}</td>
+                          <td>
+                            <span
+                              className={`status-pill ${
+                                rec.status === "diff" ? "pill-pending" : "pill-paid"
+                              }`}
+                            >
+                              {rec.status === "matched"
+                                ? miniWeb.tax.statusMatched
+                                : rec.status === "autofixed"
+                                ? miniWeb.tax.statusAutoFixed
+                                : miniWeb.tax.statusDiff}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Fiscal VAT Ledger & Tax Report Modal */}
+              {isTaxReportModalOpen && (
+                <div
+                  className="erp-modal-backdrop"
+                  onClick={() => setIsTaxReportModalOpen(false)}
+                >
+                  <div
+                    className="erp-pdf-modal"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="pdf-modal-header">
+                      <h4>{miniWeb.tax.reportModalTitle}</h4>
+                      <button
+                        type="button"
+                        onClick={() => setIsTaxReportModalOpen(false)}
+                        className="close-drawer-btn"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <div className="pdf-sheet-preview">
+                      <div className="pdf-doc-header">
+                        <span className="doc-brand">GARZANITI IT • LIBRO IVA DIGITAL</span>
+                        <span className="doc-num">AFIP-ARCA-2026-11</span>
+                      </div>
+                      <p className="doc-summary">{miniWeb.tax.reportModalDesc}</p>
+                      <div className="doc-sample-lines">
+                        <div className="sample-line">
+                          <span>{miniWeb.tax.kpi1Label}:</span>
+                          <strong>{isTaxReconciled ? "$4,890.00" : "$4,933.00"}</strong>
+                        </div>
+                        <div className="sample-line">
+                          <span>{miniWeb.tax.kpi2Label}:</span>
+                          <strong>{miniWeb.tax.kpi2Val}</strong>
+                        </div>
+                        <div className="sample-line">
+                          <span>{miniWeb.tax.kpi3Label}:</span>
+                          <strong>{isTaxReconciled ? "100.0%" : "94.2%"}</strong>
+                        </div>
+                      </div>
+                      <div className="doc-stamp">
+                        ✔ CONCILIADO CON AFIP/ARCA, ARBA Y EXTRACTOS BANCARIOS
+                      </div>
+                    </div>
+
+                    <div className="pdf-modal-footer">
+                      <button
+                        type="button"
+                        onClick={() => setIsTaxReportModalOpen(false)}
+                        className="pdf-close-btn"
+                      >
+                        {miniWeb.tax.reportClose}
                       </button>
                     </div>
                   </div>
