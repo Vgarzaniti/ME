@@ -55,7 +55,7 @@ export default function VirtualAssistant() {
     if (!msgDescriptor) return;
     setActiveMessage(msgDescriptor);
     setIsBubbleVisible(true);
-    excitedUntilRef.current = performance.now() + 1500;
+    excitedUntilRef.current = performance.now() + 1800;
 
     if (bubbleTimeoutRef.current) {
       clearTimeout(bubbleTimeoutRef.current);
@@ -74,10 +74,10 @@ export default function VirtualAssistant() {
     }
   };
 
-  // Trigger jump animation and cycle tip
+  // Trigger jump/wave animation and cycle tip
   const handleAvatarClick = () => {
     setIsJumping(true);
-    excitedUntilRef.current = performance.now() + 1800;
+    excitedUntilRef.current = performance.now() + 2000;
     setTimeout(() => setIsJumping(false), 600);
 
     const tips = t.assistant?.idleTips || [];
@@ -149,7 +149,7 @@ export default function VirtualAssistant() {
     }
 
     setIsJumping(true);
-    excitedUntilRef.current = performance.now() + 1600;
+    excitedUntilRef.current = performance.now() + 1800;
     setTimeout(() => setIsJumping(false), 600);
     showBubble({ type: "langChange" }, 7500);
   }, [language, showBubble]);
@@ -169,7 +169,7 @@ export default function VirtualAssistant() {
     return () => clearInterval(interval);
   }, [isBubbleVisible, isMinimized, t.assistant, showBubble]);
 
-  // Ready Player Me 3D Skeleton & ARKit Blendshape Engine (Three.js WebGL)
+  // Full-Body Ready Player Me 3D Skeleton (Hair + Beard + Arms + Torso + Eyes + 63 ARKit/Oculus Blendshapes)
   useEffect(() => {
     const container = threeMountRef.current;
     if (!container) return;
@@ -191,14 +191,14 @@ export default function VirtualAssistant() {
         (gltf) => {
           if (isDisposed) return;
 
-          const width = 165;
-          const height = 185;
+          const width = 185;
+          const height = 215;
           const scene = new THREE.Scene();
 
-          // Framed squarely on the Ready Player Me Half-Body Bust (y: 0.42..0.75)
-          const camera = new THREE.PerspectiveCamera(28, width / height, 0.05, 50);
-          camera.position.set(0, 0.56, 0.76);
-          camera.lookAt(0, 0.54, 0);
+          // Framed on upper body: from chest/arms (y=1.18) up to top of hair (y=1.88)
+          const camera = new THREE.PerspectiveCamera(30, width / height, 0.05, 50);
+          camera.position.set(0, 1.54, 1.32);
+          camera.lookAt(0, 1.52, 0);
 
           renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
           renderer.setSize(width, height);
@@ -212,19 +212,19 @@ export default function VirtualAssistant() {
           setHasWebGL3D(true);
 
           // Studio 3-Point Lighting + Neon Rim Accents
-          const ambientLight = new THREE.AmbientLight(0xffffff, 1.55);
+          const ambientLight = new THREE.AmbientLight(0xffffff, 1.65);
           scene.add(ambientLight);
 
-          const keyLight = new THREE.DirectionalLight(0xfff9f0, 1.65);
-          keyLight.position.set(0.8, 1.2, 1.5);
+          const keyLight = new THREE.DirectionalLight(0xfff9f0, 1.75);
+          keyLight.position.set(1.0, 2.2, 2.0);
           scene.add(keyLight);
 
-          const mintRimLight = new THREE.PointLight(0x00ff88, 1.8, 4);
-          mintRimLight.position.set(-0.9, 0.85, 0.5);
+          const mintRimLight = new THREE.PointLight(0x00ff88, 2.2, 5);
+          mintRimLight.position.set(-1.1, 1.75, 0.8);
           scene.add(mintRimLight);
 
-          const cyanRimLight = new THREE.PointLight(0x38bdf8, 1.4, 4);
-          cyanRimLight.position.set(0.9, 0.45, 0.5);
+          const cyanRimLight = new THREE.PointLight(0x38bdf8, 1.8, 5);
+          cyanRimLight.position.set(1.1, 1.35, 0.8);
           scene.add(cyanRimLight);
 
           const model = gltf.scene;
@@ -235,34 +235,47 @@ export default function VirtualAssistant() {
             head: null,
             neck: null,
             spine: null,
+            spine1: null,
+            spine2: null,
             leftEye: null,
             rightEye: null,
-            leftHand: null,
-            rightHand: null,
+            leftShoulder: null,
+            rightShoulder: null,
+            leftArm: null,
+            rightArm: null,
+            leftForeArm: null,
+            rightForeArm: null,
           };
           const morphMeshes = [];
 
           model.traverse((child) => {
-            if (child.name === "Wolf3D_Avatar_Transparent") {
-              child.visible = false;
-            }
             if (child.isBone) {
               if (child.name === "Head") bones.head = child;
               else if (child.name === "Neck") bones.neck = child;
               else if (child.name === "Spine") bones.spine = child;
+              else if (child.name === "Spine1") bones.spine1 = child;
+              else if (child.name === "Spine2") bones.spine2 = child;
               else if (child.name === "LeftEye") bones.leftEye = child;
               else if (child.name === "RightEye") bones.rightEye = child;
-              else if (child.name === "LeftHand") bones.leftHand = child;
-              else if (child.name === "RightHand") bones.rightHand = child;
+              else if (child.name === "LeftShoulder") bones.leftShoulder = child;
+              else if (child.name === "RightShoulder") bones.rightShoulder = child;
+              else if (child.name === "LeftArm") bones.leftArm = child;
+              else if (child.name === "RightArm") bones.rightArm = child;
+              else if (child.name === "LeftForeArm") bones.leftForeArm = child;
+              else if (child.name === "RightForeArm") bones.rightForeArm = child;
             }
             if (child.isMesh && child.morphTargetDictionary && child.morphTargetInfluences) {
               morphMeshes.push(child);
             }
           });
 
-          // Park detached VR hands below viewport so only the clean bust & shoulders show
-          if (bones.leftHand) bones.leftHand.scale.set(0, 0, 0);
-          if (bones.rightHand) bones.rightHand.scale.set(0, 0, 0);
+          // Store base rotations for arms so we can layer natural idle sway & gesturing on top
+          const baseRightArmZ = bones.rightArm ? bones.rightArm.rotation.z : 0.12;
+          const baseRightArmX = bones.rightArm ? bones.rightArm.rotation.x : 1.02;
+          const baseLeftArmZ = bones.leftArm ? bones.leftArm.rotation.z : -0.12;
+          const baseLeftArmX = bones.leftArm ? bones.leftArm.rotation.x : 1.02;
+          const baseRightForeArmZ = bones.rightForeArm ? bones.rightForeArm.rotation.z : -0.45;
+          const baseLeftForeArmZ = bones.leftForeArm ? bones.leftForeArm.rotation.z : 0.45;
 
           const setMorph = (name, val) => {
             const clamped = Math.max(0, Math.min(1, val));
@@ -277,7 +290,7 @@ export default function VirtualAssistant() {
 
           let smoothGazeX = 0;
           let smoothGazeY = 0;
-          let nextBlinkAt = performance.now() + 1600;
+          let nextBlinkAt = performance.now() + 1500;
           const blinkDuration = 150;
           let isDoubleBlink = false;
           const startTime = performance.now();
@@ -294,32 +307,61 @@ export default function VirtualAssistant() {
             smoothGazeX += (targetNormX - smoothGazeX) * 0.1;
             smoothGazeY += (targetNormY - smoothGazeY) * 0.1;
 
-            // 1. Skeleton Bone Articulation (Head, Neck & Spine)
-            const idleYaw = Math.sin(elapsed * 1.3) * 0.06;
-            const idlePitch = Math.cos(elapsed * 1.0) * 0.04;
-            const idleRoll = Math.sin(elapsed * 0.8) * 0.03;
+            const isSpeaking = isSpeakingRef.current;
+            const isExcited = now < excitedUntilRef.current;
+
+            // 1. Skeleton Bone Articulation (Head, Neck, Spine, Shoulders & Arms!)
+            const idleYaw = Math.sin(elapsed * 1.3) * 0.055;
+            const idlePitch = Math.cos(elapsed * 1.0) * 0.035;
+            const idleRoll = Math.sin(elapsed * 0.8) * 0.025;
 
             if (bones.neck) {
-              bones.neck.rotation.y = smoothGazeX * 0.16 + idleYaw * 0.5;
-              bones.neck.rotation.x = -smoothGazeY * 0.10 + idlePitch * 0.5;
+              bones.neck.rotation.y = smoothGazeX * 0.15 + idleYaw * 0.5;
+              bones.neck.rotation.x = -smoothGazeY * 0.09 + idlePitch * 0.5;
               bones.neck.rotation.z = -smoothGazeX * 0.04 + idleRoll;
             }
             if (bones.head) {
-              const talkNod = isSpeakingRef.current
-                ? Math.sin(elapsed * 9.5) * 0.035
-                : 0;
-              bones.head.rotation.y = smoothGazeX * 0.24 + idleYaw;
-              bones.head.rotation.x = -smoothGazeY * 0.16 + idlePitch + talkNod;
-              bones.head.rotation.z = -smoothGazeX * 0.06 + idleRoll;
+              const talkNod = isSpeaking ? Math.sin(elapsed * 9.5) * 0.038 : 0;
+              bones.head.rotation.y = smoothGazeX * 0.25 + idleYaw;
+              bones.head.rotation.x = -smoothGazeY * 0.15 + idlePitch + talkNod;
+              bones.head.rotation.z = -smoothGazeX * 0.055 + idleRoll;
             }
-            if (bones.spine) {
-              // Subtle chest breathing & torso follow
-              bones.spine.rotation.y = smoothGazeX * 0.08;
-              bones.spine.rotation.x = Math.sin(elapsed * 2.2) * 0.022;
-              bones.spine.position.y = 0.33 + Math.sin(elapsed * 2.2) * 0.004;
+            if (bones.spine2) {
+              bones.spine2.rotation.y = smoothGazeX * 0.09 + Math.sin(elapsed * 1.1) * 0.025;
+              bones.spine2.rotation.x = Math.sin(elapsed * 2.3) * 0.024;
             }
 
-            // 2. ARKit Eye Blinking (with occasional natural double-blink)
+            // 2. Real 3D Eye Socket Bone Tracking (LeftEye + RightEye bones follow cursor!)
+            if (bones.leftEye && bones.rightEye) {
+              const eyeYaw = smoothGazeX * 0.22;
+              const eyePitch = -smoothGazeY * 0.16;
+              bones.leftEye.rotation.y = eyeYaw;
+              bones.leftEye.rotation.x = eyePitch;
+              bones.rightEye.rotation.y = eyeYaw;
+              bones.rightEye.rotation.x = eyePitch;
+            }
+
+            // 3. Natural Shoulder & Arm Breathing + Talking Gestures
+            const breathSway = Math.sin(elapsed * 2.3);
+            const talkGesture = isSpeaking ? Math.sin(elapsed * 6.5) * 0.08 : 0;
+            const excitedWave = isExcited ? Math.sin(elapsed * 12.0) * 0.14 : 0;
+
+            if (bones.leftArm) {
+              bones.leftArm.rotation.x = baseLeftArmX + breathSway * 0.025 - talkGesture * 0.5;
+              bones.leftArm.rotation.z = baseLeftArmZ - breathSway * 0.02;
+            }
+            if (bones.rightArm) {
+              bones.rightArm.rotation.x = baseRightArmX + breathSway * 0.025 - talkGesture * 0.6 - excitedWave;
+              bones.rightArm.rotation.z = baseRightArmZ + breathSway * 0.02 + excitedWave * 0.5;
+            }
+            if (bones.leftForeArm) {
+              bones.leftForeArm.rotation.z = baseLeftForeArmZ + talkGesture * 0.6;
+            }
+            if (bones.rightForeArm) {
+              bones.rightForeArm.rotation.z = baseRightForeArmZ - talkGesture * 0.8 - excitedWave * 1.1;
+            }
+
+            // 4. ARKit Eye Blinking (with occasional natural double-blink)
             let blinkVal = 0;
             if (now >= nextBlinkAt) {
               const bElapsed = now - nextBlinkAt;
@@ -339,26 +381,13 @@ export default function VirtualAssistant() {
             setMorph("eyeBlinkRight", blinkVal);
             setMorph("eyesClosed", blinkVal * 0.85);
 
-            // 3. ARKit Eye Gaze Blendshapes (Eyes track cursor smoothly!)
-            const lookRight = Math.max(0, smoothGazeX);
-            const lookLeft = Math.max(0, -smoothGazeX);
+            // 5. Friendly Smile, Expressive Brows & Oculus Viseme Lip-Sync
             const lookUp = Math.max(0, smoothGazeY);
             const lookDown = Math.max(0, -smoothGazeY);
+            setMorph("eyesLookUp", lookUp * 0.6);
+            setMorph("eyesLookDown", lookDown * 0.6);
 
-            setMorph("eyeLookOutRight", lookRight * 0.75);
-            setMorph("eyeLookInLeft", lookRight * 0.75);
-            setMorph("eyeLookOutLeft", lookLeft * 0.75);
-            setMorph("eyeLookInRight", lookLeft * 0.75);
-            setMorph("eyeLookUpLeft", lookUp * 0.65);
-            setMorph("eyeLookUpRight", lookUp * 0.65);
-            setMorph("eyeLookDownLeft", lookDown * 0.65);
-            setMorph("eyeLookDownRight", lookDown * 0.65);
-
-            // 4. Friendly Smile, Expressive Brows & Oculus Viseme Lip-Sync
-            const isSpeaking = isSpeakingRef.current;
-            const isExcited = now < excitedUntilRef.current;
-
-            const baseSmile = isExcited ? 0.68 : isSpeaking ? 0.38 : 0.46;
+            const baseSmile = isExcited ? 0.68 : isSpeaking ? 0.36 : 0.45;
             setMorph("mouthSmile", baseSmile);
             setMorph("mouthSmileLeft", baseSmile * 0.85);
             setMorph("mouthSmileRight", baseSmile * 0.85);
@@ -391,8 +420,8 @@ export default function VirtualAssistant() {
             }
 
             // Dynamic key light follows cursor
-            keyLight.position.x = 0.8 + smoothGazeX * 0.9;
-            keyLight.position.y = 1.1 + smoothGazeY * 0.6;
+            keyLight.position.x = 1.0 + smoothGazeX * 1.1;
+            keyLight.position.y = 2.0 + smoothGazeY * 0.7;
 
             renderer.render(scene, camera);
           };

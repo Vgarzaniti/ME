@@ -192,8 +192,8 @@
 /* Frameless 3D Character Stage (No Box, No Border) */
 .avatar-3d-pod {
   position: relative;
-  width: 158px;
-  height: 176px;
+  width: 185px;
+  height: 215px;
   background: transparent;
   border: none;
   box-shadow: none;
