@@ -55,6 +55,7 @@ describe("VirtualAssistant component", () => {
 
     const toggleBtn = screen.getByTitle("Minimizar asistente");
     expect(toggleBtn).toBeInTheDocument();
+    expect(screen.getByText("Experimental")).toBeInTheDocument();
   });
 
   it("minimizes and restores the assistant on toggle click", () => {
