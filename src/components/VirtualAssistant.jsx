@@ -269,13 +269,17 @@ export default function VirtualAssistant() {
             }
           });
 
-          // Store base rotations for arms so we can layer natural idle sway & gesturing on top
-          const baseRightArmZ = bones.rightArm ? bones.rightArm.rotation.z : 0.12;
-          const baseRightArmX = bones.rightArm ? bones.rightArm.rotation.x : 1.02;
-          const baseLeftArmZ = bones.leftArm ? bones.leftArm.rotation.z : -0.12;
-          const baseLeftArmX = bones.leftArm ? bones.leftArm.rotation.x : 1.02;
-          const baseRightForeArmZ = bones.rightForeArm ? bones.rightForeArm.rotation.z : -0.45;
-          const baseLeftForeArmZ = bones.leftForeArm ? bones.leftForeArm.rotation.z : 0.45;
+          // Relaxed arms resting close against the torso (instead of wide A-pose)
+          const baseLeftArmX = 1.38;
+          const baseLeftArmY = 0.02;
+          const baseLeftArmZ = -0.06;
+          const baseRightArmX = 1.38;
+          const baseRightArmY = -0.02;
+          const baseRightArmZ = 0.06;
+          const baseLeftForeArmX = -0.08;
+          const baseLeftForeArmZ = 0.14;
+          const baseRightForeArmX = -0.08;
+          const baseRightForeArmZ = -0.14;
 
           const setMorph = (name, val) => {
             const clamped = Math.max(0, Math.min(1, val));
@@ -341,24 +345,28 @@ export default function VirtualAssistant() {
               bones.rightEye.rotation.x = eyePitch;
             }
 
-            // 3. Natural Shoulder & Arm Breathing + Talking Gestures
+            // 3. Natural Shoulder & Arm Breathing + Talking Gestures (Arms tucked close to torso)
             const breathSway = Math.sin(elapsed * 2.3);
-            const talkGesture = isSpeaking ? Math.sin(elapsed * 6.5) * 0.08 : 0;
-            const excitedWave = isExcited ? Math.sin(elapsed * 12.0) * 0.14 : 0;
+            const talkGesture = isSpeaking ? Math.sin(elapsed * 6.5) * 0.055 : 0;
+            const excitedWave = isExcited ? Math.sin(elapsed * 12.0) * 0.11 : 0;
 
             if (bones.leftArm) {
-              bones.leftArm.rotation.x = baseLeftArmX + breathSway * 0.025 - talkGesture * 0.5;
-              bones.leftArm.rotation.z = baseLeftArmZ - breathSway * 0.02;
+              bones.leftArm.rotation.x = baseLeftArmX + breathSway * 0.015 - talkGesture * 0.35;
+              bones.leftArm.rotation.y = baseLeftArmY;
+              bones.leftArm.rotation.z = baseLeftArmZ - breathSway * 0.012;
             }
             if (bones.rightArm) {
-              bones.rightArm.rotation.x = baseRightArmX + breathSway * 0.025 - talkGesture * 0.6 - excitedWave;
-              bones.rightArm.rotation.z = baseRightArmZ + breathSway * 0.02 + excitedWave * 0.5;
+              bones.rightArm.rotation.x = baseRightArmX + breathSway * 0.015 - talkGesture * 0.45 - excitedWave * 0.7;
+              bones.rightArm.rotation.y = baseRightArmY;
+              bones.rightArm.rotation.z = baseRightArmZ + breathSway * 0.012 + excitedWave * 0.35;
             }
             if (bones.leftForeArm) {
-              bones.leftForeArm.rotation.z = baseLeftForeArmZ + talkGesture * 0.6;
+              bones.leftForeArm.rotation.x = baseLeftForeArmX;
+              bones.leftForeArm.rotation.z = baseLeftForeArmZ + talkGesture * 0.45;
             }
             if (bones.rightForeArm) {
-              bones.rightForeArm.rotation.z = baseRightForeArmZ - talkGesture * 0.8 - excitedWave * 1.1;
+              bones.rightForeArm.rotation.x = baseRightForeArmX;
+              bones.rightForeArm.rotation.z = baseRightForeArmZ - talkGesture * 0.65 - excitedWave * 0.85;
             }
 
             // 4. ARKit Eye Blinking (with occasional natural double-blink)
@@ -471,6 +479,7 @@ export default function VirtualAssistant() {
             <span className="assistant-status-dot" />
             <span className="assistant-name">Valentín 3D</span>
             <span className="assistant-badge">{t.assistant?.statusOnline || "En línea"}</span>
+            <span className="assistant-exp-tag">{t.assistant?.experimentalTag || "Experimental"}</span>
           </div>
           <p className="bubble-text">{renderedBubbleText}</p>
           <div className="bubble-quick-actions">
@@ -501,6 +510,12 @@ export default function VirtualAssistant() {
           aria-label={t.assistant?.tooltipName || "Valentín 3D • Asistente Virtual"}
         >
           <div className="avatar-3d-pod">
+            {/* Floating Experimental Pill above the 3D Avatar */}
+            <span className="avatar-experimental-pill">
+              <span className="exp-pill-dot" />
+              {t.assistant?.experimentalTag || "Experimental"}
+            </span>
+
             {/* Real-Time Ready Player Me 3D Skeleton & ARKit Blendshape Canvas */}
             <div
               ref={threeMountRef}

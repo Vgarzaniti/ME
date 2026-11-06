@@ -84,6 +84,18 @@
   border: 1px solid rgba(0, 255, 136, 0.3);
 }
 
+.assistant-exp-tag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.14rem 0.42rem;
+  border-radius: 9999px;
+  background: rgba(56, 189, 248, 0.14);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.38);
+}
+
 .bubble-close-btn {
   position: absolute;
   top: 8px;
@@ -201,6 +213,41 @@
   align-items: flex-end;
   justify-content: center;
   overflow: visible;
+}
+
+/* Floating "Experimental" Pill above the 3D Avatar */
+.avatar-experimental-pill {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: 9999px;
+  background: rgba(10, 15, 24, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  color: #38bdf8;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45), 0 0 10px rgba(56, 189, 248, 0.18);
+}
+
+.exp-pill-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 6px #38bdf8;
+  animation: assistantPulse 2s infinite ease-in-out;
 }
 
 .pod-character-wrapper {
