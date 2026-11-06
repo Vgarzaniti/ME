@@ -15,14 +15,20 @@ export default function VirtualAssistant() {
   const [isBubbleVisible, setIsBubbleVisible] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
   const [tipIndex, setTipIndex] = useState(0);
-  const [hasGlbModel, setHasGlbModel] = useState(false);
+  const [hasWebGL3D, setHasWebGL3D] = useState(false);
   const [isJumping, setIsJumping] = useState(false);
 
-  // 3D Tilt Coordinates
+  // 3D Tilt Coordinates (ref + state so WebGL loop never restarts on mousemove!)
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
+  const targetTiltRef = useRef({ rotateX: 0, rotateY: 0 });
+  const isSpeakingRef = useRef(false);
 
   const bubbleTimeoutRef = useRef(null);
   const isInitialMount = useRef(true);
+
+  useEffect(() => {
+    isSpeakingRef.current = isBubbleVisible;
+  }, [isBubbleVisible]);
 
   // Helper to resolve localized text from the active message descriptor
   const getMessageText = useCallback((msg, currentT) => {
@@ -79,15 +85,17 @@ export default function VirtualAssistant() {
     }
   };
 
-  // Mouse move listener for smooth 3D parallax tilt
+  // Mouse move listener for smooth 3D parallax & head tracking
   useEffect(() => {
     const handleMouseMove = (e) => {
       const normX = (e.clientX / window.innerWidth) * 2 - 1;
       const normY = (e.clientY / window.innerHeight) * 2 - 1;
-      setTilt({
-        rotateY: normX * 18,
-        rotateX: -normY * 14,
-      });
+      const nextTilt = {
+        rotateY: normX * 22,
+        rotateX: -normY * 15,
+      };
+      targetTiltRef.current = nextTilt;
+      setTilt(nextTilt);
     };
 
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
@@ -96,7 +104,7 @@ export default function VirtualAssistant() {
 
   // Section observer for contextual assistant prompts
   useEffect(() => {
-    const sectionIds = ["hero", "showcase", "services", "projects", "about", "contact"];
+    const sectionIds = ["hero", "showcase", "services", "projects", "process", "about", "contact"];
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const viewportMid = scrollY + window.innerHeight * 0.35;
@@ -130,16 +138,13 @@ export default function VirtualAssistant() {
     return () => clearTimeout(greetingTimer);
   }, [showBubble]);
 
-  // React immediately to language switches:
-  // 1. Re-render any active bubble in the new language.
-  // 2. Animate avatar jump and announce the language change!
+  // React immediately to language switches
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
       return;
     }
 
-    // Avatar reacts and speaks in the newly chosen language
     setIsJumping(true);
     setTimeout(() => setIsJumping(false), 600);
     showBubble({ type: "langChange" }, 7500);
@@ -160,70 +165,155 @@ export default function VirtualAssistant() {
     return () => clearInterval(interval);
   }, [isBubbleVisible, isMinimized, t.assistant, showBubble]);
 
-  // Check for GLB model availability (e.g. from Ready Player Me)
+  // Real-Time Three.js 3D WebGL Engine (Loads reconstructed /models/valentin.glb with PBR lighting, breathing & head tracking)
   useEffect(() => {
     const container = threeMountRef.current;
     if (!container) return;
 
+    let animId = null;
+    let renderer = null;
+    let isDisposed = false;
+
     try {
-      const origin = window.location?.origin && window.location.origin !== "null"
-        ? window.location.origin
-        : "";
+      const origin =
+        window.location?.origin && window.location.origin !== "null"
+          ? window.location.origin
+          : "";
       const modelPath = origin ? `${origin}/models/valentin.glb` : "/models/valentin.glb";
+      const normalPath = origin
+        ? `${origin}/valentin-3d-normal.png`
+        : "/valentin-3d-normal.png";
 
       const loader = new GLTFLoader();
       loader.load(
         modelPath,
         (gltf) => {
-          setHasGlbModel(true);
-          const width = 140;
-          const height = 140;
+          if (isDisposed) return;
+
+          const width = 124;
+          const height = 138;
           const scene = new THREE.Scene();
-          const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
-          camera.position.set(0, 0.2, 3.0);
+          const camera = new THREE.PerspectiveCamera(34, width / height, 0.1, 100);
+          camera.position.set(0, 0.02, 3.35);
 
-          const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+          renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
           renderer.setSize(width, height);
-          renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-          container.appendChild(renderer.domElement);
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+          if ("outputColorSpace" in renderer && THREE.SRGBColorSpace) {
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+          }
 
-          const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
+          container.innerHTML = "";
+          container.appendChild(renderer.domElement);
+          setHasWebGL3D(true);
+
+          // Studio 3-Point Lighting + Dynamic Cursor Key Light
+          const ambientLight = new THREE.AmbientLight(0xffffff, 1.55);
           scene.add(ambientLight);
-          const dirLight = new THREE.DirectionalLight(0x00ff88, 1.8);
-          dirLight.position.set(2, 3, 2);
-          scene.add(dirLight);
+
+          const keyLight = new THREE.DirectionalLight(0xfff8ed, 1.35);
+          keyLight.position.set(1.5, 2.0, 3.5);
+          scene.add(keyLight);
+
+          const mintRimLight = new THREE.PointLight(0x00ff88, 2.2, 8);
+          mintRimLight.position.set(-2.2, 1.4, 1.8);
+          scene.add(mintRimLight);
+
+          const cyanRimLight = new THREE.PointLight(0x38bdf8, 1.8, 8);
+          cyanRimLight.position.set(2.2, -1.0, 1.8);
+          scene.add(cyanRimLight);
 
           const model = gltf.scene;
-          model.scale.set(1.2, 1.2, 1.2);
-          model.position.set(0, -0.7, 0);
+          model.scale.set(1.12, 1.12, 1.15);
+          model.position.set(0, -0.04, 0);
+
+          // Optional Normal Map enrichment for crisp 3D curls, nose bridge & lapels
+          try {
+            const texLoader = new THREE.TextureLoader();
+            texLoader.load(
+              normalPath,
+              (normalTex) => {
+                normalTex.flipY = false;
+                model.traverse((child) => {
+                  if (child.isMesh && child.material) {
+                    child.material.normalMap = normalTex;
+                    child.material.normalScale = new THREE.Vector2(0.55, 0.55);
+                    child.material.needsUpdate = true;
+                  }
+                });
+              },
+              undefined,
+              () => {}
+            );
+          } catch {
+            // Normal map is optional enhancement
+          }
+
           scene.add(model);
 
-          let animId;
-          const animate = () => {
+          let currentRotX = 0;
+          let currentRotY = 0;
+          const startTime = performance.now();
+
+          const animate = (now) => {
+            if (isDisposed) return;
             animId = requestAnimationFrame(animate);
-            model.rotation.y = (tilt.rotateY * Math.PI) / 180;
-            model.rotation.x = (tilt.rotateX * Math.PI) / 180;
+
+            const elapsed = (now - startTime) * 0.001;
+
+            // Smooth spring interpolation toward cursor + subtle organic idle motion
+            const idleYaw = Math.sin(elapsed * 1.4) * 3.2;
+            const idlePitch = Math.cos(elapsed * 1.1) * 1.8;
+            const targetY =
+              ((targetTiltRef.current.rotateY + idleYaw) * Math.PI) / 180;
+            const targetX =
+              ((-targetTiltRef.current.rotateX + idlePitch) * Math.PI) / 180;
+
+            currentRotY += (targetY - currentRotY) * 0.09;
+            currentRotX += (targetX - currentRotX) * 0.09;
+
+            model.rotation.y = currentRotY;
+            model.rotation.x = currentRotX;
+
+            // Organic breathing & talking micro-nod
+            const breathY = Math.sin(elapsed * 2.3) * 0.025;
+            const talkPulse = isSpeakingRef.current
+              ? Math.sin(elapsed * 14.0) * 0.014
+              : 0;
+            model.position.y = -0.04 + breathY + talkPulse;
+
+            const breathScale = 1.12 + Math.sin(elapsed * 2.3) * 0.012;
+            model.scale.set(breathScale, breathScale + talkPulse * 0.4, 1.18);
+
+            // Dynamic key light follows cursor so 3D specular highlights glide over face
+            keyLight.position.x = 1.2 + (targetTiltRef.current.rotateY / 22) * 2.0;
+            keyLight.position.y = 1.5 + (targetTiltRef.current.rotateX / 15) * 1.5;
+
             renderer.render(scene, camera);
           };
-          animate();
 
-          return () => {
-            cancelAnimationFrame(animId);
-            renderer.dispose();
-            if (container && renderer.domElement) {
-              container.removeChild(renderer.domElement);
-            }
-          };
+          animId = requestAnimationFrame(animate);
         },
         undefined,
         () => {
-          setHasGlbModel(false);
+          setHasWebGL3D(false);
         }
       );
     } catch {
-      setHasGlbModel(false);
+      setHasWebGL3D(false);
     }
-  }, [tilt]);
+
+    return () => {
+      isDisposed = true;
+      if (animId) cancelAnimationFrame(animId);
+      if (renderer) {
+        renderer.dispose();
+        if (container && renderer.domElement && container.contains(renderer.domElement)) {
+          container.removeChild(renderer.domElement);
+        }
+      }
+    };
+  }, []);
 
   const renderedBubbleText = getMessageText(activeMessage, t);
 
@@ -276,20 +366,23 @@ export default function VirtualAssistant() {
           title={t.assistant?.tooltipName || "Valentín 3D • Asistente Virtual"}
           aria-label={t.assistant?.tooltipName || "Valentín 3D • Asistente Virtual"}
         >
-          {hasGlbModel ? (
-            <div ref={threeMountRef} className="three-canvas-holder" />
-          ) : (
-            /* Pixar / Disney 3D Stylized Avatar with Real-Time Parallax Tilt */
+          <div
+            className="avatar-3d-pod"
+            style={{
+              transform: `perspective(600px) rotateX(${tilt.rotateX * 0.45}deg) rotateY(${tilt.rotateY * 0.45}deg)`,
+            }}
+          >
+            {/* Outer Glowing Cyber Ring */}
+            <div className="pod-cyber-ring" />
+
+            {/* Real-Time Three.js WebGL 3D Mesh Canvas */}
             <div
-              className="avatar-3d-pod"
-              style={{
-                transform: `perspective(600px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
-              }}
-            >
-              {/* Outer Glowing Cyber Ring */}
-              <div className="pod-cyber-ring" />
-              
-              {/* Character Render */}
+              ref={threeMountRef}
+              className={`three-canvas-holder ${hasWebGL3D ? "webgl-active" : "webgl-hidden"}`}
+            />
+
+            {/* Fallback 2D image if WebGL context is unavailable (e.g. headless test runner) */}
+            {!hasWebGL3D && (
               <div className="pod-character-wrapper">
                 <img
                   src="/valentin-3d-avatar.png"
@@ -298,21 +391,21 @@ export default function VirtualAssistant() {
                   draggable="false"
                 />
               </div>
+            )}
 
-              {/* Holographic Specular Glint */}
-              <div
-                className="pod-hologram-shine"
-                style={{
-                  transform: `translateX(${tilt.rotateY * 2.5}px) translateY(${tilt.rotateX * 2.5}px)`,
-                }}
-              />
+            {/* Holographic Specular Glint */}
+            <div
+              className="pod-hologram-shine"
+              style={{
+                transform: `translateX(${tilt.rotateY * 2.2}px) translateY(${tilt.rotateX * 2.2}px)`,
+              }}
+            />
 
-              {/* Status Indicator Chip */}
-              <span className="pod-status-pill">
-                <span className="status-dot-inner" /> AI
-              </span>
-            </div>
-          )}
+            {/* Status Indicator Chip */}
+            <span className="pod-status-pill">
+              <span className="status-dot-inner" /> 3D AI
+            </span>
+          </div>
 
           {/* Holographic Floor Pulse Ring */}
           <div className="avatar-pulse-ring" />
