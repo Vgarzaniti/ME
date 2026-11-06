@@ -55,7 +55,7 @@ export default function VirtualAssistant() {
     if (!msgDescriptor) return;
     setActiveMessage(msgDescriptor);
     setIsBubbleVisible(true);
-    excitedUntilRef.current = performance.now() + 1400;
+    excitedUntilRef.current = performance.now() + 1500;
 
     if (bubbleTimeoutRef.current) {
       clearTimeout(bubbleTimeoutRef.current);
@@ -88,7 +88,7 @@ export default function VirtualAssistant() {
     }
   };
 
-  // Mouse move listener for smooth 3D parallax & gaze tracking
+  // Mouse move listener for smooth 3D head & eye gaze tracking
   useEffect(() => {
     const handleMouseMove = (e) => {
       const normX = (e.clientX / window.innerWidth) * 2 - 1;
@@ -169,7 +169,7 @@ export default function VirtualAssistant() {
     return () => clearInterval(interval);
   }, [isBubbleVisible, isMinimized, t.assistant, showBubble]);
 
-  // Frameless Three.js 3D WebGL Engine with Live Facial Rigging (Eye Gaze, Blinking, Talking, Breathing & Neck Pivoting)
+  // Ready Player Me 3D Skeleton & ARKit Blendshape Engine (Three.js WebGL)
   useEffect(() => {
     const container = threeMountRef.current;
     if (!container) return;
@@ -184,9 +184,6 @@ export default function VirtualAssistant() {
           ? window.location.origin
           : "";
       const modelPath = origin ? `${origin}/models/valentin.glb` : "/models/valentin.glb";
-      const normalPath = origin
-        ? `${origin}/valentin-3d-normal.png`
-        : "/valentin-3d-normal.png";
 
       const loader = new GLTFLoader();
       loader.load(
@@ -197,8 +194,11 @@ export default function VirtualAssistant() {
           const width = 165;
           const height = 185;
           const scene = new THREE.Scene();
-          const camera = new THREE.PerspectiveCamera(32, width / height, 0.1, 100);
-          camera.position.set(0, 0.04, 3.45);
+
+          // Framed squarely on the Ready Player Me Half-Body Bust (y: 0.42..0.75)
+          const camera = new THREE.PerspectiveCamera(28, width / height, 0.05, 50);
+          camera.position.set(0, 0.56, 0.76);
+          camera.lookAt(0, 0.54, 0);
 
           renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
           renderer.setSize(width, height);
@@ -211,71 +211,74 @@ export default function VirtualAssistant() {
           container.appendChild(renderer.domElement);
           setHasWebGL3D(true);
 
-          // Studio 3-Point Lighting + Dynamic Cursor Key Light
-          const ambientLight = new THREE.AmbientLight(0xffffff, 1.65);
+          // Studio 3-Point Lighting + Neon Rim Accents
+          const ambientLight = new THREE.AmbientLight(0xffffff, 1.55);
           scene.add(ambientLight);
 
-          const keyLight = new THREE.DirectionalLight(0xfff9f0, 1.45);
-          keyLight.position.set(1.5, 2.0, 3.5);
+          const keyLight = new THREE.DirectionalLight(0xfff9f0, 1.65);
+          keyLight.position.set(0.8, 1.2, 1.5);
           scene.add(keyLight);
 
-          const mintRimLight = new THREE.PointLight(0x00ff88, 2.4, 8);
-          mintRimLight.position.set(-2.2, 1.4, 1.8);
+          const mintRimLight = new THREE.PointLight(0x00ff88, 1.8, 4);
+          mintRimLight.position.set(-0.9, 0.85, 0.5);
           scene.add(mintRimLight);
 
-          const cyanRimLight = new THREE.PointLight(0x38bdf8, 1.9, 8);
-          cyanRimLight.position.set(2.2, -1.0, 1.8);
+          const cyanRimLight = new THREE.PointLight(0x38bdf8, 1.4, 4);
+          cyanRimLight.position.set(0.9, 0.45, 0.5);
           scene.add(cyanRimLight);
 
           const model = gltf.scene;
-          model.scale.set(1.16, 1.16, 1.22);
-          model.position.set(0, -0.04, 0);
+          scene.add(model);
 
-          // Collect mesh geometry & UV buffers for real-time facial rigging
-          let rigMesh = null;
-          let basePos = null;
-          let baseUV = null;
+          // Collect Ready Player Me Skeleton Bones & ARKit/Oculus Morph Target Meshes
+          const bones = {
+            head: null,
+            neck: null,
+            spine: null,
+            leftEye: null,
+            rightEye: null,
+            leftHand: null,
+            rightHand: null,
+          };
+          const morphMeshes = [];
 
           model.traverse((child) => {
-            if (child.isMesh && child.geometry) {
-              rigMesh = child;
-              const posAttr = child.geometry.attributes.position;
-              const uvAttr = child.geometry.attributes.uv;
-              if (posAttr && uvAttr) {
-                basePos = new Float32Array(posAttr.array);
-                baseUV = new Float32Array(uvAttr.array);
-              }
+            if (child.name === "Wolf3D_Avatar_Transparent") {
+              child.visible = false;
+            }
+            if (child.isBone) {
+              if (child.name === "Head") bones.head = child;
+              else if (child.name === "Neck") bones.neck = child;
+              else if (child.name === "Spine") bones.spine = child;
+              else if (child.name === "LeftEye") bones.leftEye = child;
+              else if (child.name === "RightEye") bones.rightEye = child;
+              else if (child.name === "LeftHand") bones.leftHand = child;
+              else if (child.name === "RightHand") bones.rightHand = child;
+            }
+            if (child.isMesh && child.morphTargetDictionary && child.morphTargetInfluences) {
+              morphMeshes.push(child);
             }
           });
 
-          // Apply Normal Map for crisp 3D curls, nose bridge & blazer lapels
-          try {
-            const texLoader = new THREE.TextureLoader();
-            texLoader.load(
-              normalPath,
-              (normalTex) => {
-                normalTex.flipY = false;
-                model.traverse((child) => {
-                  if (child.isMesh && child.material) {
-                    child.material.normalMap = normalTex;
-                    child.material.normalScale = new THREE.Vector2(0.6, 0.6);
-                    child.material.needsUpdate = true;
-                  }
-                });
-              },
-              undefined,
-              () => {}
-            );
-          } catch {
-            // Optional enhancement
-          }
+          // Park detached VR hands below viewport so only the clean bust & shoulders show
+          if (bones.leftHand) bones.leftHand.scale.set(0, 0, 0);
+          if (bones.rightHand) bones.rightHand.scale.set(0, 0, 0);
 
-          scene.add(model);
+          const setMorph = (name, val) => {
+            const clamped = Math.max(0, Math.min(1, val));
+            for (let i = 0; i < morphMeshes.length; i++) {
+              const m = morphMeshes[i];
+              const idx = m.morphTargetDictionary[name];
+              if (idx !== undefined) {
+                m.morphTargetInfluences[idx] = clamped;
+              }
+            }
+          };
 
           let smoothGazeX = 0;
           let smoothGazeY = 0;
-          let nextBlinkAt = performance.now() + 1800;
-          let blinkDuration = 150;
+          let nextBlinkAt = performance.now() + 1600;
+          const blinkDuration = 150;
           let isDoubleBlink = false;
           const startTime = performance.now();
 
@@ -288,181 +291,108 @@ export default function VirtualAssistant() {
             // Smooth spring interpolation toward cursor (-1..1 normalized)
             const targetNormX = targetTiltRef.current.rotateY / 25;
             const targetNormY = targetTiltRef.current.rotateX / 18;
-            smoothGazeX += (targetNormX - smoothGazeX) * 0.11;
-            smoothGazeY += (targetNormY - smoothGazeY) * 0.11;
+            smoothGazeX += (targetNormX - smoothGazeX) * 0.1;
+            smoothGazeY += (targetNormY - smoothGazeY) * 0.1;
 
-            // Compute natural eye blink (0 = open, 1 = closed)
-            let blinkAmount = 0;
+            // 1. Skeleton Bone Articulation (Head, Neck & Spine)
+            const idleYaw = Math.sin(elapsed * 1.3) * 0.06;
+            const idlePitch = Math.cos(elapsed * 1.0) * 0.04;
+            const idleRoll = Math.sin(elapsed * 0.8) * 0.03;
+
+            if (bones.neck) {
+              bones.neck.rotation.y = smoothGazeX * 0.16 + idleYaw * 0.5;
+              bones.neck.rotation.x = -smoothGazeY * 0.10 + idlePitch * 0.5;
+              bones.neck.rotation.z = -smoothGazeX * 0.04 + idleRoll;
+            }
+            if (bones.head) {
+              const talkNod = isSpeakingRef.current
+                ? Math.sin(elapsed * 9.5) * 0.035
+                : 0;
+              bones.head.rotation.y = smoothGazeX * 0.24 + idleYaw;
+              bones.head.rotation.x = -smoothGazeY * 0.16 + idlePitch + talkNod;
+              bones.head.rotation.z = -smoothGazeX * 0.06 + idleRoll;
+            }
+            if (bones.spine) {
+              // Subtle chest breathing & torso follow
+              bones.spine.rotation.y = smoothGazeX * 0.08;
+              bones.spine.rotation.x = Math.sin(elapsed * 2.2) * 0.022;
+              bones.spine.position.y = 0.33 + Math.sin(elapsed * 2.2) * 0.004;
+            }
+
+            // 2. ARKit Eye Blinking (with occasional natural double-blink)
+            let blinkVal = 0;
             if (now >= nextBlinkAt) {
               const bElapsed = now - nextBlinkAt;
               if (bElapsed <= blinkDuration) {
-                blinkAmount = Math.sin((bElapsed / blinkDuration) * Math.PI);
+                blinkVal = Math.sin((bElapsed / blinkDuration) * Math.PI);
               } else if (isDoubleBlink && bElapsed <= blinkDuration * 2.3) {
                 const b2 = bElapsed - blinkDuration * 1.3;
                 if (b2 >= 0) {
-                  blinkAmount = Math.sin((b2 / blinkDuration) * Math.PI);
+                  blinkVal = Math.sin((b2 / blinkDuration) * Math.PI);
                 }
               } else {
                 nextBlinkAt = now + 2200 + Math.random() * 2800;
                 isDoubleBlink = Math.random() < 0.28;
               }
             }
+            setMorph("eyeBlinkLeft", blinkVal);
+            setMorph("eyeBlinkRight", blinkVal);
+            setMorph("eyesClosed", blinkVal * 0.85);
 
-            // Speaking lip-sync & eyebrow expression
+            // 3. ARKit Eye Gaze Blendshapes (Eyes track cursor smoothly!)
+            const lookRight = Math.max(0, smoothGazeX);
+            const lookLeft = Math.max(0, -smoothGazeX);
+            const lookUp = Math.max(0, smoothGazeY);
+            const lookDown = Math.max(0, -smoothGazeY);
+
+            setMorph("eyeLookOutRight", lookRight * 0.75);
+            setMorph("eyeLookInLeft", lookRight * 0.75);
+            setMorph("eyeLookOutLeft", lookLeft * 0.75);
+            setMorph("eyeLookInRight", lookLeft * 0.75);
+            setMorph("eyeLookUpLeft", lookUp * 0.65);
+            setMorph("eyeLookUpRight", lookUp * 0.65);
+            setMorph("eyeLookDownLeft", lookDown * 0.65);
+            setMorph("eyeLookDownRight", lookDown * 0.65);
+
+            // 4. Friendly Smile, Expressive Brows & Oculus Viseme Lip-Sync
             const isSpeaking = isSpeakingRef.current;
             const isExcited = now < excitedUntilRef.current;
-            const talkOpen = isSpeaking
-              ? (Math.sin(elapsed * 16.0) * 0.5 + 0.5) *
-                (Math.cos(elapsed * 9.5) * 0.4 + 0.6)
-              : 0;
-            const browRaise =
-              (isExcited ? 1.0 : 0.0) +
-              (isSpeaking ? (Math.sin(elapsed * 5.0) * 0.5 + 0.5) * 0.65 : 0.0) +
-              Math.max(0, smoothGazeY) * 0.35;
 
-            // Real-time vertex & UV deformation for live eyes, eyelids, eyebrows, mouth, head & chest!
-            if (rigMesh && basePos && baseUV) {
-              const posAttr = rigMesh.geometry.attributes.position;
-              const uvAttr = rigMesh.geometry.attributes.uv;
-              const posArr = posAttr.array;
-              const uvArr = uvAttr.array;
-              const count = posAttr.count;
+            const baseSmile = isExcited ? 0.68 : isSpeaking ? 0.38 : 0.46;
+            setMorph("mouthSmile", baseSmile);
+            setMorph("mouthSmileLeft", baseSmile * 0.85);
+            setMorph("mouthSmileRight", baseSmile * 0.85);
+            setMorph("cheekSquintLeft", baseSmile * 0.35);
+            setMorph("cheekSquintRight", baseSmile * 0.35);
 
-              const headYaw = smoothGazeX * 0.16 + Math.sin(elapsed * 1.5) * 0.035;
-              const headPitch = -smoothGazeY * 0.11 + Math.cos(elapsed * 1.2) * 0.025;
-              const headRoll = -smoothGazeX * 0.045 + Math.sin(elapsed * 0.9) * 0.015;
-              const cosY = Math.cos(headYaw);
-              const sinY = Math.sin(headYaw);
-              const cosX = Math.cos(headPitch);
-              const sinX = Math.sin(headPitch);
-              const cosZ = Math.cos(headRoll);
-              const sinZ = Math.sin(headRoll);
+            const browLift =
+              (isExcited ? 0.65 : 0.15) +
+              (isSpeaking ? (Math.sin(elapsed * 5.5) * 0.5 + 0.5) * 0.38 : 0) +
+              lookUp * 0.3;
+            setMorph("browInnerUp", browLift);
+            setMorph("browOuterUpLeft", browLift * 0.8);
+            setMorph("browOuterUpRight", browLift * 0.8);
 
-              const breathPhase = Math.sin(elapsed * 2.4);
-
-              for (let i = 0; i < count; i++) {
-                const i3 = i * 3;
-                const i2 = i * 2;
-
-                let x = basePos[i3];
-                let y = basePos[i3 + 1];
-                let z = basePos[i3 + 2];
-                let u = baseUV[i2];
-                let v = baseUV[i2 + 1];
-
-                // 1. Eye Pupil Gaze Tracking (shifts iris/pupil UV smoothly inside both eye sockets)
-                const dxL = (u - 0.388) / 0.046;
-                const dyL = (v - 0.395) / 0.030;
-                const distL2 = dxL * dxL + dyL * dyL;
-
-                const dxR = (u - 0.606) / 0.046;
-                const dyR = (v - 0.395) / 0.030;
-                const distR2 = dxR * dxR + dyR * dyR;
-
-                if (distL2 < 1.0) {
-                  const wEye = 1.0 - distL2;
-                  const wPupil = wEye * wEye;
-                  u -= smoothGazeX * 0.016 * wPupil;
-                  v += smoothGazeY * 0.010 * wPupil;
-                } else if (distR2 < 1.0) {
-                  const wEye = 1.0 - distR2;
-                  const wPupil = wEye * wEye;
-                  u -= smoothGazeX * 0.016 * wPupil;
-                  v += smoothGazeY * 0.010 * wPupil;
-                }
-
-                // 2. Natural Eyelid Blink (upper eyelid sweeps down over the eye during blink)
-                const bLx = (u - 0.395) / 0.072;
-                const bLy = (v - 0.400) / 0.044;
-                const bL2 = bLx * bLx + bLy * bLy;
-
-                const bRx = (u - 0.605) / 0.072;
-                const bRy = (v - 0.398) / 0.044;
-                const bR2 = bRx * bRx + bRy * bRy;
-
-                if (blinkAmount > 0.01 && (bL2 < 1.0 || bR2 < 1.0)) {
-                  const bWeight = bL2 < 1.0 ? 1.0 - bL2 : 1.0 - bR2;
-                  // Pull UV upward to sample the upper eyelid skin over the eyeball
-                  v -= blinkAmount * 0.042 * bWeight;
-                  y -= blinkAmount * 0.018 * bWeight;
-                }
-
-                // 3. Expressive Eyebrow Lift
-                const brLx = (u - 0.380) / 0.085;
-                const brLy = (v - 0.332) / 0.032;
-                const brL2 = brLx * brLx + brLy * brLy;
-
-                const brRx = (u - 0.620) / 0.085;
-                const brRy = (v - 0.330) / 0.032;
-                const brR2 = brRx * brRx + brRy * brRy;
-
-                if (brL2 < 1.0 || brR2 < 1.0) {
-                  const brW = brL2 < 1.0 ? 1.0 - brL2 : 1.0 - brR2;
-                  y += browRaise * 0.022 * brW;
-                }
-
-                // 4. Talking Jaw & Lip Animation
-                if (talkOpen > 0.01) {
-                  const mX = (u - 0.500) / 0.095;
-                  const mY = (v - 0.565) / 0.075;
-                  const m2 = mX * mX + mY * mY;
-                  if (m2 < 1.0) {
-                    const mW = (1.0 - m2) * (1.0 - m2);
-                    y -= talkOpen * 0.032 * mW;
-                    z += talkOpen * 0.018 * mW;
-                  }
-                }
-
-                // 5. Anatomical Head vs. Shoulders Articulation
-                // v < 0.60 is head/hair, 0.60..0.74 is neck transition, > 0.74 is shoulders/chest
-                const headWeight = Math.max(0.0, Math.min(1.0, (0.72 - v) / 0.16));
-                const chestWeight = 1.0 - headWeight;
-
-                if (headWeight > 0.001) {
-                  // Pivot around neck base (0, -0.22, -0.05)
-                  const px = x;
-                  const py = y + 0.22;
-                  const pz = z + 0.05;
-
-                  // Roll (Z), Pitch (X), Yaw (Y) scaled by headWeight
-                  const rX1 = px * cosZ - py * sinZ;
-                  const rY1 = px * sinZ + py * cosZ;
-
-                  const rY2 = rY1 * cosX - pz * sinX;
-                  const rZ2 = rY1 * sinX + pz * cosX;
-
-                  const rX3 = rX1 * cosY + rZ2 * sinY;
-                  const rZ3 = -rX1 * sinY + rZ2 * cosY;
-
-                  x = x * chestWeight + rX3 * headWeight;
-                  y = y * chestWeight + (rY2 - 0.22) * headWeight;
-                  z = z * chestWeight + (rZ3 - 0.05) * headWeight;
-                }
-
-                // 6. Chest & Shoulder Breathing Expansion
-                if (chestWeight > 0.01) {
-                  y += breathPhase * 0.018 * chestWeight;
-                  z += breathPhase * 0.024 * chestWeight;
-                  x *= 1.0 + breathPhase * 0.012 * chestWeight;
-                }
-
-                posArr[i3] = x;
-                posArr[i3 + 1] = y;
-                posArr[i3 + 2] = z;
-                uvArr[i2] = u;
-                uvArr[i2 + 1] = v;
-              }
-
-              posAttr.needsUpdate = true;
-              uvAttr.needsUpdate = true;
+            if (isSpeaking) {
+              const aa = Math.max(0, Math.sin(elapsed * 14.0)) * 0.55;
+              const oh = Math.max(0, Math.cos(elapsed * 10.5)) * 0.42;
+              const ee = Math.max(0, Math.sin(elapsed * 18.0 + 1.2)) * 0.38;
+              setMorph("viseme_aa", aa);
+              setMorph("viseme_O", oh);
+              setMorph("viseme_E", ee);
+              setMorph("jawOpen", (aa + oh) * 0.45);
+              setMorph("mouthOpen", (aa + oh) * 0.5);
+            } else {
+              setMorph("viseme_aa", 0);
+              setMorph("viseme_O", 0);
+              setMorph("viseme_E", 0);
+              setMorph("jawOpen", 0);
+              setMorph("mouthOpen", 0);
             }
 
-            // Subtle whole-body hover float
-            model.position.y = -0.04 + Math.sin(elapsed * 2.0) * 0.02;
-
-            // Dynamic key light follows cursor so 3D specular highlights glide over face
-            keyLight.position.x = 1.2 + smoothGazeX * 2.2;
-            keyLight.position.y = 1.5 + smoothGazeY * 1.6;
+            // Dynamic key light follows cursor
+            keyLight.position.x = 0.8 + smoothGazeX * 0.9;
+            keyLight.position.y = 1.1 + smoothGazeY * 0.6;
 
             renderer.render(scene, camera);
           };
@@ -542,7 +472,7 @@ export default function VirtualAssistant() {
           aria-label={t.assistant?.tooltipName || "Valentín 3D • Asistente Virtual"}
         >
           <div className="avatar-3d-pod">
-            {/* Real-Time Three.js WebGL 3D Rigged Character */}
+            {/* Real-Time Ready Player Me 3D Skeleton & ARKit Blendshape Canvas */}
             <div
               ref={threeMountRef}
               className={`three-canvas-holder ${hasWebGL3D ? "webgl-active" : "webgl-hidden"}`}
