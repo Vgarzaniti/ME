@@ -54,7 +54,21 @@ function Projects() {
                 <span className="status-dot" />
                 {p.deployed ? t.projects.statusDeployed : t.projects.statusRepo}
               </span>
+              {p.metric && <span className="project-metric-pill">{p.metric}</span>}
             </div>
+
+            {p.architecture && (
+              <div className="project-arch-pipeline" aria-label={t.projects.archLabel}>
+                {p.architecture.map((node, nIdx) => (
+                  <React.Fragment key={nIdx}>
+                    <span className="arch-node">{node}</span>
+                    {nIdx < p.architecture.length - 1 && (
+                      <span className="arch-arrow">→</span>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
 
             <div className="project-content">
               <h3 className="project-title">{p.name}</h3>

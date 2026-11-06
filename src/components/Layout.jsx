@@ -1,8 +1,9 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import VirtualAssistant from "./VirtualAssistant";
+
+const VirtualAssistant = lazy(() => import("./VirtualAssistant"));
 
 function Layout() {
   return (
@@ -12,7 +13,9 @@ function Layout() {
         <Outlet />
       </main>
       <Footer />
-      <VirtualAssistant />
+      <Suspense fallback={null}>
+        <VirtualAssistant />
+      </Suspense>
     </>
   );
 }
