@@ -18,10 +18,11 @@ export default function VirtualAssistant() {
   const [hasWebGL3D, setHasWebGL3D] = useState(false);
   const [isJumping, setIsJumping] = useState(false);
 
-  // 3D Tilt Coordinates (ref + state so WebGL loop never restarts on mousemove!)
+  // 3D Tilt & Expression Refs (updated at 60 FPS without recreating WebGL scene)
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
   const targetTiltRef = useRef({ rotateX: 0, rotateY: 0 });
   const isSpeakingRef = useRef(false);
+  const excitedUntilRef = useRef(0);
 
   const bubbleTimeoutRef = useRef(null);
   const isInitialMount = useRef(true);
@@ -54,6 +55,7 @@ export default function VirtualAssistant() {
     if (!msgDescriptor) return;
     setActiveMessage(msgDescriptor);
     setIsBubbleVisible(true);
+    excitedUntilRef.current = performance.now() + 1400;
 
     if (bubbleTimeoutRef.current) {
       clearTimeout(bubbleTimeoutRef.current);
@@ -75,6 +77,7 @@ export default function VirtualAssistant() {
   // Trigger jump animation and cycle tip
   const handleAvatarClick = () => {
     setIsJumping(true);
+    excitedUntilRef.current = performance.now() + 1800;
     setTimeout(() => setIsJumping(false), 600);
 
     const tips = t.assistant?.idleTips || [];
@@ -85,14 +88,14 @@ export default function VirtualAssistant() {
     }
   };
 
-  // Mouse move listener for smooth 3D parallax & head tracking
+  // Mouse move listener for smooth 3D parallax & gaze tracking
   useEffect(() => {
     const handleMouseMove = (e) => {
       const normX = (e.clientX / window.innerWidth) * 2 - 1;
       const normY = (e.clientY / window.innerHeight) * 2 - 1;
       const nextTilt = {
-        rotateY: normX * 22,
-        rotateX: -normY * 15,
+        rotateY: normX * 25,
+        rotateX: -normY * 18,
       };
       targetTiltRef.current = nextTilt;
       setTilt(nextTilt);
@@ -146,6 +149,7 @@ export default function VirtualAssistant() {
     }
 
     setIsJumping(true);
+    excitedUntilRef.current = performance.now() + 1600;
     setTimeout(() => setIsJumping(false), 600);
     showBubble({ type: "langChange" }, 7500);
   }, [language, showBubble]);
@@ -165,7 +169,7 @@ export default function VirtualAssistant() {
     return () => clearInterval(interval);
   }, [isBubbleVisible, isMinimized, t.assistant, showBubble]);
 
-  // Real-Time Three.js 3D WebGL Engine (Loads reconstructed /models/valentin.glb with PBR lighting, breathing & head tracking)
+  // Frameless Three.js 3D WebGL Engine with Live Facial Rigging (Eye Gaze, Blinking, Talking, Breathing & Neck Pivoting)
   useEffect(() => {
     const container = threeMountRef.current;
     if (!container) return;
@@ -190,11 +194,11 @@ export default function VirtualAssistant() {
         (gltf) => {
           if (isDisposed) return;
 
-          const width = 124;
-          const height = 138;
+          const width = 165;
+          const height = 185;
           const scene = new THREE.Scene();
-          const camera = new THREE.PerspectiveCamera(34, width / height, 0.1, 100);
-          camera.position.set(0, 0.02, 3.35);
+          const camera = new THREE.PerspectiveCamera(32, width / height, 0.1, 100);
+          camera.position.set(0, 0.04, 3.45);
 
           renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
           renderer.setSize(width, height);
@@ -208,26 +212,43 @@ export default function VirtualAssistant() {
           setHasWebGL3D(true);
 
           // Studio 3-Point Lighting + Dynamic Cursor Key Light
-          const ambientLight = new THREE.AmbientLight(0xffffff, 1.55);
+          const ambientLight = new THREE.AmbientLight(0xffffff, 1.65);
           scene.add(ambientLight);
 
-          const keyLight = new THREE.DirectionalLight(0xfff8ed, 1.35);
+          const keyLight = new THREE.DirectionalLight(0xfff9f0, 1.45);
           keyLight.position.set(1.5, 2.0, 3.5);
           scene.add(keyLight);
 
-          const mintRimLight = new THREE.PointLight(0x00ff88, 2.2, 8);
+          const mintRimLight = new THREE.PointLight(0x00ff88, 2.4, 8);
           mintRimLight.position.set(-2.2, 1.4, 1.8);
           scene.add(mintRimLight);
 
-          const cyanRimLight = new THREE.PointLight(0x38bdf8, 1.8, 8);
+          const cyanRimLight = new THREE.PointLight(0x38bdf8, 1.9, 8);
           cyanRimLight.position.set(2.2, -1.0, 1.8);
           scene.add(cyanRimLight);
 
           const model = gltf.scene;
-          model.scale.set(1.12, 1.12, 1.15);
+          model.scale.set(1.16, 1.16, 1.22);
           model.position.set(0, -0.04, 0);
 
-          // Optional Normal Map enrichment for crisp 3D curls, nose bridge & lapels
+          // Collect mesh geometry & UV buffers for real-time facial rigging
+          let rigMesh = null;
+          let basePos = null;
+          let baseUV = null;
+
+          model.traverse((child) => {
+            if (child.isMesh && child.geometry) {
+              rigMesh = child;
+              const posAttr = child.geometry.attributes.position;
+              const uvAttr = child.geometry.attributes.uv;
+              if (posAttr && uvAttr) {
+                basePos = new Float32Array(posAttr.array);
+                baseUV = new Float32Array(uvAttr.array);
+              }
+            }
+          });
+
+          // Apply Normal Map for crisp 3D curls, nose bridge & blazer lapels
           try {
             const texLoader = new THREE.TextureLoader();
             texLoader.load(
@@ -237,7 +258,7 @@ export default function VirtualAssistant() {
                 model.traverse((child) => {
                   if (child.isMesh && child.material) {
                     child.material.normalMap = normalTex;
-                    child.material.normalScale = new THREE.Vector2(0.55, 0.55);
+                    child.material.normalScale = new THREE.Vector2(0.6, 0.6);
                     child.material.needsUpdate = true;
                   }
                 });
@@ -246,13 +267,16 @@ export default function VirtualAssistant() {
               () => {}
             );
           } catch {
-            // Normal map is optional enhancement
+            // Optional enhancement
           }
 
           scene.add(model);
 
-          let currentRotX = 0;
-          let currentRotY = 0;
+          let smoothGazeX = 0;
+          let smoothGazeY = 0;
+          let nextBlinkAt = performance.now() + 1800;
+          let blinkDuration = 150;
+          let isDoubleBlink = false;
           const startTime = performance.now();
 
           const animate = (now) => {
@@ -261,33 +285,184 @@ export default function VirtualAssistant() {
 
             const elapsed = (now - startTime) * 0.001;
 
-            // Smooth spring interpolation toward cursor + subtle organic idle motion
-            const idleYaw = Math.sin(elapsed * 1.4) * 3.2;
-            const idlePitch = Math.cos(elapsed * 1.1) * 1.8;
-            const targetY =
-              ((targetTiltRef.current.rotateY + idleYaw) * Math.PI) / 180;
-            const targetX =
-              ((-targetTiltRef.current.rotateX + idlePitch) * Math.PI) / 180;
+            // Smooth spring interpolation toward cursor (-1..1 normalized)
+            const targetNormX = targetTiltRef.current.rotateY / 25;
+            const targetNormY = targetTiltRef.current.rotateX / 18;
+            smoothGazeX += (targetNormX - smoothGazeX) * 0.11;
+            smoothGazeY += (targetNormY - smoothGazeY) * 0.11;
 
-            currentRotY += (targetY - currentRotY) * 0.09;
-            currentRotX += (targetX - currentRotX) * 0.09;
+            // Compute natural eye blink (0 = open, 1 = closed)
+            let blinkAmount = 0;
+            if (now >= nextBlinkAt) {
+              const bElapsed = now - nextBlinkAt;
+              if (bElapsed <= blinkDuration) {
+                blinkAmount = Math.sin((bElapsed / blinkDuration) * Math.PI);
+              } else if (isDoubleBlink && bElapsed <= blinkDuration * 2.3) {
+                const b2 = bElapsed - blinkDuration * 1.3;
+                if (b2 >= 0) {
+                  blinkAmount = Math.sin((b2 / blinkDuration) * Math.PI);
+                }
+              } else {
+                nextBlinkAt = now + 2200 + Math.random() * 2800;
+                isDoubleBlink = Math.random() < 0.28;
+              }
+            }
 
-            model.rotation.y = currentRotY;
-            model.rotation.x = currentRotX;
-
-            // Organic breathing & talking micro-nod
-            const breathY = Math.sin(elapsed * 2.3) * 0.025;
-            const talkPulse = isSpeakingRef.current
-              ? Math.sin(elapsed * 14.0) * 0.014
+            // Speaking lip-sync & eyebrow expression
+            const isSpeaking = isSpeakingRef.current;
+            const isExcited = now < excitedUntilRef.current;
+            const talkOpen = isSpeaking
+              ? (Math.sin(elapsed * 16.0) * 0.5 + 0.5) *
+                (Math.cos(elapsed * 9.5) * 0.4 + 0.6)
               : 0;
-            model.position.y = -0.04 + breathY + talkPulse;
+            const browRaise =
+              (isExcited ? 1.0 : 0.0) +
+              (isSpeaking ? (Math.sin(elapsed * 5.0) * 0.5 + 0.5) * 0.65 : 0.0) +
+              Math.max(0, smoothGazeY) * 0.35;
 
-            const breathScale = 1.12 + Math.sin(elapsed * 2.3) * 0.012;
-            model.scale.set(breathScale, breathScale + talkPulse * 0.4, 1.18);
+            // Real-time vertex & UV deformation for live eyes, eyelids, eyebrows, mouth, head & chest!
+            if (rigMesh && basePos && baseUV) {
+              const posAttr = rigMesh.geometry.attributes.position;
+              const uvAttr = rigMesh.geometry.attributes.uv;
+              const posArr = posAttr.array;
+              const uvArr = uvAttr.array;
+              const count = posAttr.count;
+
+              const headYaw = smoothGazeX * 0.16 + Math.sin(elapsed * 1.5) * 0.035;
+              const headPitch = -smoothGazeY * 0.11 + Math.cos(elapsed * 1.2) * 0.025;
+              const headRoll = -smoothGazeX * 0.045 + Math.sin(elapsed * 0.9) * 0.015;
+              const cosY = Math.cos(headYaw);
+              const sinY = Math.sin(headYaw);
+              const cosX = Math.cos(headPitch);
+              const sinX = Math.sin(headPitch);
+              const cosZ = Math.cos(headRoll);
+              const sinZ = Math.sin(headRoll);
+
+              const breathPhase = Math.sin(elapsed * 2.4);
+
+              for (let i = 0; i < count; i++) {
+                const i3 = i * 3;
+                const i2 = i * 2;
+
+                let x = basePos[i3];
+                let y = basePos[i3 + 1];
+                let z = basePos[i3 + 2];
+                let u = baseUV[i2];
+                let v = baseUV[i2 + 1];
+
+                // 1. Eye Pupil Gaze Tracking (shifts iris/pupil UV smoothly inside both eye sockets)
+                const dxL = (u - 0.388) / 0.046;
+                const dyL = (v - 0.395) / 0.030;
+                const distL2 = dxL * dxL + dyL * dyL;
+
+                const dxR = (u - 0.606) / 0.046;
+                const dyR = (v - 0.395) / 0.030;
+                const distR2 = dxR * dxR + dyR * dyR;
+
+                if (distL2 < 1.0) {
+                  const wEye = 1.0 - distL2;
+                  const wPupil = wEye * wEye;
+                  u -= smoothGazeX * 0.016 * wPupil;
+                  v += smoothGazeY * 0.010 * wPupil;
+                } else if (distR2 < 1.0) {
+                  const wEye = 1.0 - distR2;
+                  const wPupil = wEye * wEye;
+                  u -= smoothGazeX * 0.016 * wPupil;
+                  v += smoothGazeY * 0.010 * wPupil;
+                }
+
+                // 2. Natural Eyelid Blink (upper eyelid sweeps down over the eye during blink)
+                const bLx = (u - 0.395) / 0.072;
+                const bLy = (v - 0.400) / 0.044;
+                const bL2 = bLx * bLx + bLy * bLy;
+
+                const bRx = (u - 0.605) / 0.072;
+                const bRy = (v - 0.398) / 0.044;
+                const bR2 = bRx * bRx + bRy * bRy;
+
+                if (blinkAmount > 0.01 && (bL2 < 1.0 || bR2 < 1.0)) {
+                  const bWeight = bL2 < 1.0 ? 1.0 - bL2 : 1.0 - bR2;
+                  // Pull UV upward to sample the upper eyelid skin over the eyeball
+                  v -= blinkAmount * 0.042 * bWeight;
+                  y -= blinkAmount * 0.018 * bWeight;
+                }
+
+                // 3. Expressive Eyebrow Lift
+                const brLx = (u - 0.380) / 0.085;
+                const brLy = (v - 0.332) / 0.032;
+                const brL2 = brLx * brLx + brLy * brLy;
+
+                const brRx = (u - 0.620) / 0.085;
+                const brRy = (v - 0.330) / 0.032;
+                const brR2 = brRx * brRx + brRy * brRy;
+
+                if (brL2 < 1.0 || brR2 < 1.0) {
+                  const brW = brL2 < 1.0 ? 1.0 - brL2 : 1.0 - brR2;
+                  y += browRaise * 0.022 * brW;
+                }
+
+                // 4. Talking Jaw & Lip Animation
+                if (talkOpen > 0.01) {
+                  const mX = (u - 0.500) / 0.095;
+                  const mY = (v - 0.565) / 0.075;
+                  const m2 = mX * mX + mY * mY;
+                  if (m2 < 1.0) {
+                    const mW = (1.0 - m2) * (1.0 - m2);
+                    y -= talkOpen * 0.032 * mW;
+                    z += talkOpen * 0.018 * mW;
+                  }
+                }
+
+                // 5. Anatomical Head vs. Shoulders Articulation
+                // v < 0.60 is head/hair, 0.60..0.74 is neck transition, > 0.74 is shoulders/chest
+                const headWeight = Math.max(0.0, Math.min(1.0, (0.72 - v) / 0.16));
+                const chestWeight = 1.0 - headWeight;
+
+                if (headWeight > 0.001) {
+                  // Pivot around neck base (0, -0.22, -0.05)
+                  const px = x;
+                  const py = y + 0.22;
+                  const pz = z + 0.05;
+
+                  // Roll (Z), Pitch (X), Yaw (Y) scaled by headWeight
+                  const rX1 = px * cosZ - py * sinZ;
+                  const rY1 = px * sinZ + py * cosZ;
+
+                  const rY2 = rY1 * cosX - pz * sinX;
+                  const rZ2 = rY1 * sinX + pz * cosX;
+
+                  const rX3 = rX1 * cosY + rZ2 * sinY;
+                  const rZ3 = -rX1 * sinY + rZ2 * cosY;
+
+                  x = x * chestWeight + rX3 * headWeight;
+                  y = y * chestWeight + (rY2 - 0.22) * headWeight;
+                  z = z * chestWeight + (rZ3 - 0.05) * headWeight;
+                }
+
+                // 6. Chest & Shoulder Breathing Expansion
+                if (chestWeight > 0.01) {
+                  y += breathPhase * 0.018 * chestWeight;
+                  z += breathPhase * 0.024 * chestWeight;
+                  x *= 1.0 + breathPhase * 0.012 * chestWeight;
+                }
+
+                posArr[i3] = x;
+                posArr[i3 + 1] = y;
+                posArr[i3 + 2] = z;
+                uvArr[i2] = u;
+                uvArr[i2 + 1] = v;
+              }
+
+              posAttr.needsUpdate = true;
+              uvAttr.needsUpdate = true;
+            }
+
+            // Subtle whole-body hover float
+            model.position.y = -0.04 + Math.sin(elapsed * 2.0) * 0.02;
 
             // Dynamic key light follows cursor so 3D specular highlights glide over face
-            keyLight.position.x = 1.2 + (targetTiltRef.current.rotateY / 22) * 2.0;
-            keyLight.position.y = 1.5 + (targetTiltRef.current.rotateX / 15) * 1.5;
+            keyLight.position.x = 1.2 + smoothGazeX * 2.2;
+            keyLight.position.y = 1.5 + smoothGazeY * 1.6;
 
             renderer.render(scene, camera);
           };
@@ -356,7 +531,7 @@ export default function VirtualAssistant() {
         </div>
       )}
 
-      {/* Floating 3D Avatar Stage */}
+      {/* Floating Frameless 3D Avatar Stage */}
       <div className="avatar-stage-wrapper">
         <button
           type="button"
@@ -366,16 +541,8 @@ export default function VirtualAssistant() {
           title={t.assistant?.tooltipName || "Valentín 3D • Asistente Virtual"}
           aria-label={t.assistant?.tooltipName || "Valentín 3D • Asistente Virtual"}
         >
-          <div
-            className="avatar-3d-pod"
-            style={{
-              transform: `perspective(600px) rotateX(${tilt.rotateX * 0.45}deg) rotateY(${tilt.rotateY * 0.45}deg)`,
-            }}
-          >
-            {/* Outer Glowing Cyber Ring */}
-            <div className="pod-cyber-ring" />
-
-            {/* Real-Time Three.js WebGL 3D Mesh Canvas */}
+          <div className="avatar-3d-pod">
+            {/* Real-Time Three.js WebGL 3D Rigged Character */}
             <div
               ref={threeMountRef}
               className={`three-canvas-holder ${hasWebGL3D ? "webgl-active" : "webgl-hidden"}`}
@@ -383,7 +550,12 @@ export default function VirtualAssistant() {
 
             {/* Fallback 2D image if WebGL context is unavailable (e.g. headless test runner) */}
             {!hasWebGL3D && (
-              <div className="pod-character-wrapper">
+              <div
+                className="pod-character-wrapper"
+                style={{
+                  transform: `perspective(600px) rotateX(${tilt.rotateX * 0.5}deg) rotateY(${tilt.rotateY * 0.5}deg)`,
+                }}
+              >
                 <img
                   src="/valentin-3d-avatar.png"
                   alt="Valentín Augusto Garzaniti 3D Avatar"
@@ -392,22 +564,9 @@ export default function VirtualAssistant() {
                 />
               </div>
             )}
-
-            {/* Holographic Specular Glint */}
-            <div
-              className="pod-hologram-shine"
-              style={{
-                transform: `translateX(${tilt.rotateY * 2.2}px) translateY(${tilt.rotateX * 2.2}px)`,
-              }}
-            />
-
-            {/* Status Indicator Chip */}
-            <span className="pod-status-pill">
-              <span className="status-dot-inner" /> 3D AI
-            </span>
           </div>
 
-          {/* Holographic Floor Pulse Ring */}
+          {/* Subtle Holographic Pedestal Glow under Bust */}
           <div className="avatar-pulse-ring" />
         </button>
 

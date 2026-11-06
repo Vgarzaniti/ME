@@ -77,14 +77,17 @@
 }
 
 /* 3D Laptop Container */
-.laptop-container {
+.laptop-container,
+.laptop-3d {
   position: relative;
-  width: 90%;
+  width: 92%;
   max-width: 820px;
+  margin: 0 auto;
   z-index: 2;
   transform-style: preserve-3d;
   transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
   will-change: transform;
+  text-align: left;
 }
 
 /* Laptop Screen Lid */
@@ -102,7 +105,8 @@
 }
 
 /* Top Bezel Camera */
-.laptop-camera {
+.laptop-camera,
+.screen-bezel-top {
   background: #161b22;
   height: 18px;
   display: flex;

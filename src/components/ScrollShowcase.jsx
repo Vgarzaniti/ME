@@ -371,14 +371,14 @@ export default function ScrollShowcase() {
     }
   }, [terminalHistory, activeTab]);
 
-  const scale = 0.86 + scrollProgress * 0.32;
-  const rotateX = Math.max(0, 24 - scrollProgress * 24);
-  const translateY = (1 - scrollProgress) * 30;
+  const scale = 0.88 + scrollProgress * 0.14;
+  const rotateX = Math.max(0, 18 - scrollProgress * 18);
+  const translateY = (1 - scrollProgress) * 20;
   const floatingCardsOpacity = Math.min(Math.max((scrollProgress - 0.15) / 0.4, 0), 1);
-  const floatingCardsTranslate = (1 - scrollProgress) * 45;
+  const floatingCardsTranslate = (1 - scrollProgress) * 35;
 
   return (
-    <div className="scroll-showcase-wrapper" ref={sectionRef}>
+    <div id="showcase" className="scroll-showcase-wrapper" ref={sectionRef}>
       <div className="scroll-showcase-sticky">
         <div className="showcase-header">
           <span className="showcase-pill">{t.showcase.pill}</span>
